@@ -1,0 +1,197 @@
+.annonce {
+  padding: 2rem 0;
+  min-height: 60vh;
+}
+
+.gallery {
+  margin-bottom: 2rem;
+}
+
+.mainImage {
+  width: 100%;
+  height: auto;
+  max-height: 600px;
+  object-fit: cover;
+  border-radius: 0.5rem;
+}
+
+.thumbnails {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.thumbnail {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.thumbnail:hover {
+  opacity: 0.8;
+}
+
+.content {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+}
+
+.main {
+  flex: 1;
+}
+
+.header {
+  margin-bottom: 2rem;
+}
+
+.header h1 {
+  font-size: 2.5rem;
+  color: #2c5282;
+  margin-bottom: 0.5rem;
+}
+
+.location {
+  font-size: 1.125rem;
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+.badge {
+  display: inline-block;
+  background: #2c5282;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.price {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #2c5282;
+  margin-bottom: 2rem;
+}
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: #f9fafb;
+  border-radius: 0.5rem;
+}
+
+.feature {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  font-size: 0.875rem;
+  color: #666;
+  margin-bottom: 0.25rem;
+}
+
+.value {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2c5282;
+}
+
+.description,
+.address {
+  margin-bottom: 2rem;
+}
+
+.description h2,
+.address h2 {
+  font-size: 1.5rem;
+  color: #2c5282;
+  margin-bottom: 1rem;
+}
+
+.description p,
+.address p {
+  line-height: 1.8;
+  font-size: 1.125rem;
+}
+
+.sidebar {
+  position: sticky;
+  top: 6rem;
+  height: fit-content;
+}
+
+.contact {
+  background: #f9fafb;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.contact h3 {
+  font-size: 1.5rem;
+  color: #2c5282;
+  margin-bottom: 1rem;
+}
+
+.contact p {
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.button,
+.buttonSecondary {
+  display: block;
+  text-align: center;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  transition: all 0.2s;
+}
+
+.button {
+  background: #2c5282;
+  color: #fff;
+}
+
+.button:hover {
+  background: #1a365d;
+}
+
+.buttonSecondary {
+  background: #fff;
+  color: #2c5282;
+  border: 2px solid #2c5282;
+}
+
+.buttonSecondary:hover {
+  background: #f0f7ff;
+}
+
+@media (max-width: 968px) {
+  .content {
+    grid-template-columns: 1fr;
+  }
+  
+  .sidebar {
+    position: static;
+  }
+  
+  .header h1 {
+    font-size: 2rem;
+  }
+  
+  .price {
+    font-size: 2rem;
+  }
+}

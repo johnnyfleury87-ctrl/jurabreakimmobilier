@@ -1,0 +1,140 @@
+.admin {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  min-height: 100vh;
+}
+
+.nav {
+  background: #2c5282;
+  color: #fff;
+  padding: 2rem 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.navHeader {
+  padding: 0 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.navHeader h2 {
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+}
+
+.navHeader a {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.875rem;
+  text-decoration: underline;
+}
+
+.nav ul {
+  list-style: none;
+  padding: 0;
+}
+
+.nav li {
+  margin: 0;
+}
+
+.nav a {
+  display: block;
+  padding: 0.75rem 1.5rem;
+  color: rgba(255, 255, 255, 0.9);
+  transition: background 0.2s;
+}
+
+.nav a:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.main {
+  padding: 2rem;
+  max-width: 1400px;
+}
+
+.main h1 {
+  font-size: 2rem;
+  color: #2c5282;
+  margin-bottom: 2rem;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.statCard {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.statCard h3 {
+  font-size: 0.875rem;
+  color: #666;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.statNumber {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #2c5282;
+  margin-bottom: 1rem;
+}
+
+.statCard a {
+  color: #2c5282;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.quickActions {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.quickActions h2 {
+  font-size: 1.5rem;
+  color: #2c5282;
+  margin-bottom: 1.5rem;
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.actionButton {
+  background: #2c5282;
+  color: #fff;
+  padding: 1rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.actionButton:hover {
+  background: #1a365d;
+}
+
+@media (max-width: 968px) {
+  .admin {
+    grid-template-columns: 1fr;
+  }
+  
+  .nav {
+    position: static;
+    height: auto;
+  }
+}

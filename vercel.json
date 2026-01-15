@@ -1,0 +1,16 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
+  "env": {
+    "NEXT_PUBLIC_SUPABASE_URL": "@supabase-url",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@supabase-anon-key",
+    "SUPABASE_SERVICE_ROLE_KEY": "@supabase-service-role-key",
+    "STRIPE_SECRET_KEY": "@stripe-secret-key",
+    "STRIPE_WEBHOOK_SECRET": "@stripe-webhook-secret",
+    "STRIPE_PRICE_ID_FORMULE1": "@stripe-price-formule1",
+    "STRIPE_PRICE_ID_FORMULE2": "@stripe-price-formule2",
+    "EMAIL_PROVIDER_API_KEY": "@email-api-key",
+    "BASE_URL": "@base-url"
+  }
+}

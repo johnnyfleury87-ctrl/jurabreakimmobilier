@@ -1,0 +1,262 @@
+.estimation {
+  padding: 4rem 0;
+  min-height: 60vh;
+}
+
+.estimation h1 {
+  font-size: 3rem;
+  color: #2c5282;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.intro {
+  text-align: center;
+  font-size: 1.125rem;
+  color: #666;
+  margin-bottom: 3rem;
+}
+
+.formules {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.formules h2 {
+  font-size: 2rem;
+  color: #2c5282;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.formuleCard {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.formuleCard h3 {
+  font-size: 1.5rem;
+  color: #2c5282;
+  margin-bottom: 1rem;
+}
+
+.prix {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #2c5282;
+  margin-bottom: 1rem;
+}
+
+.description {
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+.features {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 2rem;
+  flex: 1;
+}
+
+.features li {
+  padding: 0.5rem 0 0.5rem 1.5rem;
+  position: relative;
+  color: #333;
+}
+
+.features li:before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: #2c5282;
+  font-weight: bold;
+}
+
+.selectButton {
+  background: #2c5282;
+  color: #fff;
+  padding: 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.selectButton:hover {
+  background: #1a365d;
+}
+
+.form {
+  max-width: 800px;
+  margin: 0 auto;
+  background: #fff;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.formuleSelected {
+  background: #f0f7ff;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.changeFormule {
+  background: transparent;
+  color: #2c5282;
+  border: 1px solid #2c5282;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.error {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid #ef4444;
+}
+
+form h2 {
+  font-size: 1.5rem;
+  color: #2c5282;
+  margin: 2rem 0 1rem;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.field {
+  margin-bottom: 1.5rem;
+}
+
+.field label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: #2c5282;
+}
+
+.field textarea {
+  resize: vertical;
+}
+
+.termsCheckbox {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 0.5rem;
+}
+
+.termsCheckbox label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  cursor: pointer;
+  font-size: 0.938rem;
+  line-height: 1.6;
+}
+
+.termsCheckbox input[type="checkbox"] {
+  margin-top: 0.25rem;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.termsCheckbox a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.termsCheckbox a:hover {
+  color: #1d4ed8;
+}
+
+.disclaimer {
+  background: #fef3c7;
+  border-left: 4px solid #f59e0b;
+  padding: 1rem;
+  margin: 2rem 0;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.submit {
+  width: 100%;
+  background: #2c5282;
+  color: #fff;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.submit:hover:not(:disabled) {
+  background: #1a365d;
+}
+
+.submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .estimation h1 {
+    font-size: 2rem;
+  }
+  
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .row {
+    grid-template-columns: 1fr;
+  }
+}
