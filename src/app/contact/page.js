@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import styles from './page.module.css'
 
-export default function ContactPage() {
+function ContactForm() {
   const searchParams = useSearchParams()
   const annonceId = searchParams.get('annonce')
   
@@ -173,5 +173,13 @@ export default function ContactPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function ContactPage() {
+  return (
+    <Suspense fallback={<div className="container">Chargement...</div>}>
+      <ContactForm />
+    </Suspense>
   )
 }
