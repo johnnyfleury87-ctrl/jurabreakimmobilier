@@ -70,25 +70,35 @@ Dans **Settings** > **API** :
 
 ## Étape 4 : Configuration Locale (1 min)
 
-Créer `.env.local` :
+**Le fichier `.env.local` est déjà créé à la racine du projet.**
 
-```env
-# Supabase (copier depuis Supabase)
+1. Ouvrir `.env.local`
+2. Remplir les variables avec vos vraies clés :
+
+```bash
+# Supabase - Trouver dans Supabase Dashboard → Settings → API
 NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGc...
 SUPABASE_SERVICE_ROLE_KEY=eyJhbGc...
 
-# Stripe (copier depuis Stripe)
+# Stripe - Trouver dans Stripe Dashboard → Developers → API Keys
 STRIPE_SECRET_KEY=sk_test_xxxxx
-STRIPE_WEBHOOK_SECRET=whsec_xxxxx
+STRIPE_WEBHOOK_SECRET=whsec_xxxxx  # Généré à l'étape 5
 STRIPE_PRICE_ID_FORMULE1=price_xxxxx
 STRIPE_PRICE_ID_FORMULE2=price_xxxxx
 
-# Email (optionnel pour l'instant)
+# Email (optionnel - fonctionnalité TODO)
 EMAIL_PROVIDER_API_KEY=
 
-# Base URL
+# Base URL (déjà configuré)
 BASE_URL=http://localhost:3000
+```
+
+**⚠️ IMPORTANT** : `.env.local` est ignoré par Git. Vos clés ne seront jamais commitées.
+
+**🔍 Vérifier la configuration** :
+```bash
+npm run env:check
 ```
 
 ## Étape 5 : Lancer (1 min)
@@ -173,6 +183,21 @@ Une fois le quick start validé :
 3. Suivre [STRIPE_SETUP.md](docs/STRIPE_SETUP.md) pour config complète
 4. Consulter [TODO.md](TODO.md) pour les points à finaliser
 5. Valider avec [CHECKLIST.md](CHECKLIST.md)
+
+## 🔐 Variables d'Environnement
+
+### En Local (Développement)
+- Fichier : `.env.local` (à la racine)
+- ✅ Ignoré par Git
+- ✅ Contient vos vraies clés de développement
+- Vérifier : `npm run env:check`
+
+### En Production (Vercel)
+- Aller dans **Vercel Dashboard** → Settings → Environment Variables
+- Configurer les mêmes variables que `.env.local`
+- Documentation complète : [docs/SETUP_VERCEL_ENV.md](docs/SETUP_VERCEL_ENV.md)
+
+**⚠️ IMPORTANT** : Ne jamais commiter `.env` ou `.env.local` dans Git !
 
 ## 🎯 C'est Prêt !
 
