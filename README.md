@@ -99,19 +99,13 @@ cd jurabreakimmobilier
 # Installer les dépendances
 npm install
 
-# Copier .env.example vers .env et remplir les variables
-cp .env.example .env
+# Copier .env.example vers .env.local et remplir les variables
+cp .env.example .env.local
 
-# Variables à configurer dans .env :
-# NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
-# NEXT_PUBLIC_SUPABASE_ANON_KEY=xxx
-# SUPABASE_SERVICE_ROLE_KEY=xxx
-# STRIPE_SECRET_KEY=sk_test_xxx
-# STRIPE_WEBHOOK_SECRET=whsec_xxx
-# STRIPE_PRICE_ID_FORMULE1=price_xxx
-# STRIPE_PRICE_ID_FORMULE2=price_xxx
-# EMAIL_PROVIDER_API_KEY=xxx (optionnel)
-# BASE_URL=http://localhost:3000
+# Éditer .env.local avec vos vraies clés (voir docs/SETUP_VERCEL_ENV.md)
+
+# Vérifier la configuration
+npm run env:check
 
 # Lancer en développement
 npm run dev
@@ -119,7 +113,26 @@ npm run dev
 
 Le site est accessible sur `http://localhost:3000`
 
-### 5. Vérifications
+**⚠️ SÉCURITÉ** : Ne jamais commiter `.env` ou `.env.local` - Ces fichiers sont dans `.gitignore`
+
+### 5. Configuration des Variables d'Environnement
+
+Voir la documentation complète : **[docs/SETUP_VERCEL_ENV.md](docs/SETUP_VERCEL_ENV.md)**
+
+**Variables requises** :
+- `NEXT_PUBLIC_SUPABASE_URL` - URL du projet Supabase
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Clé publique Supabase
+- `SUPABASE_SERVICE_ROLE_KEY` - ⚠️ Clé admin (server-only)
+- `STRIPE_SECRET_KEY` - ⚠️ Clé secrète Stripe (server-only)
+- `STRIPE_WEBHOOK_SECRET` - ⚠️ Secret webhook Stripe
+- `STRIPE_PRICE_ID_FORMULE1` - Price ID Formule Standard (49€)
+- `STRIPE_PRICE_ID_FORMULE2` - Price ID Formule Premium (149€)
+- `BASE_URL` - URL du site (`http://localhost:3000` en dev)
+
+**Variables optionnelles** :
+- `EMAIL_PROVIDER_API_KEY` - Clé API Resend/Sendgrid (TODO)
+
+### 6. Vérifications
 
 Exécuter les vérifications SQL :
 
@@ -136,15 +149,43 @@ Vérifier que :
 
 ## Déploiement Vercel
 
-1. Connecter le repo à Vercel
+### Configuration Complète
 
-2. Configurer les variables d'environnement (identiques à .env)
+Voir la documentation détaillée : **[docs/SETUP_VERCEL_ENV.md](docs/SETUP_VERCEL_ENV.md)**
 
-3. Déployer
+### Étapes Rapides
 
-4. Mettre à jour l'URL du webhook Stripe avec l'URL de production
+1. **Connecter le repo à Vercel**
+   - Importer le projet depuis GitHub
+   - Framework Preset : Next.js
+   - Root Directory : `./`
 
-5. Mettre à jour `BASE_URL` dans les variables d'environnement Vercel
+2. **Configurer les variables d'environnement**
+   - Aller dans Settings → Environment Variables
+   - Ajouter les 8 variables requises (voir docs/SETUP_VERCEL_ENV.md)
+   - Sélectionner **Production** et **Preview**
+
+3. **Déployer**
+   - Push sur `main` → Auto-deploy
+   - Ou cliquer "Deploy" dans Vercel Dashboard
+
+4. **Configurer le webhook Stripe**
+   - Stripe Dashboard → Webhooks → Add endpoint
+   - URL : `https://votre-domaine.vercel.app/api/webhooks/stripe`
+   - Événements : `checkout.session.completed`
+   - Copier le Signing Secret → Mettre à jour `STRIPE_WEBHOOK_SECRET` dans Vercel
+
+5. **Mettre à jour BASE_URL**
+   - Vercel → Environment Variables
+   - `BASE_URL` = `https://votre-domaine.vercel.app`
+   - Redéployer
+
+### Sécurité
+
+- ✅ `.env.example` ne contient QUE des placeholders
+- ✅ `.env` et `.env.local` sont dans `.gitignore`
+- ✅ Variables server-only configurées dans Vercel (jamais dans le code)
+- ✅ Vérification avec `npm run env:check`
 
 ## Structure du Projet
 

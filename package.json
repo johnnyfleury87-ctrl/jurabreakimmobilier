@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "env:check": "node scripts/check-env.js",
+    "security:audit": "bash scripts/security-audit.sh"
   },
   "dependencies": {
     "next": "^14.2.0",
