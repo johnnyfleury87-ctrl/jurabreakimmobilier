@@ -3,18 +3,28 @@ import styles from './page.module.css'
 import { createClient } from '@/lib/supabase/server'
 
 export default async function HomePage() {
-  const supabase = createClient()
+  let settingsMap = {}
   
-  // Fetch settings depuis Supabase
-  const { data: settingsData } = await supabase
-    .from('agence_settings')
-    .select('key, value')
-    .in('key', ['home_hero_title', 'home_hero_subtitle', 'home_services', 'home_about_text'])
-  
-  const settingsMap = settingsData?.reduce((acc, s) => {
-    acc[s.key] = s.value
-    return acc
-  }, {}) || {}
+  try {
+    const supabase = createClient()
+    
+    // Fetch settings depuis Supabase
+    const { data: settingsData, error } = await supabase
+      .from('agence_settings')
+      .select('key, value')
+      .in('key', ['home_hero_title', 'home_hero_subtitle', 'home_services', 'home_about_text'])
+    
+    if (error) {
+      console.error('Supabase error:', error)
+    }
+    
+    settingsMap = settingsData?.reduce((acc, s) => {
+      acc[s.key] = s.value
+      return acc
+    }, {}) || {}
+  } catch (err) {
+    console.error('Failed to fetch settings:', err)
+  }
   
   const heroTitle = settingsMap.home_hero_title || 'Bienvenue chez JuraBreak Immobilier'
   const heroSubtitle = settingsMap.home_hero_subtitle || 'Votre agence immobilière de confiance dans le Jura'

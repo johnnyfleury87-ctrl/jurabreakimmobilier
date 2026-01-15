@@ -218,6 +218,7 @@ CREATE POLICY "Admin can read analytics"
 -- POLICIES: estimations
 -- ============================================
 -- INSERT public: autorisé (statut DRAFT uniquement + restrictions champs sensibles)
+-- Note: contrainte sur terms_accepted_at pour formule_2 ajoutée dans migration 0005
 CREATE POLICY "Public can insert draft estimations"
   ON estimations FOR INSERT
   TO public
@@ -227,11 +228,6 @@ CREATE POLICY "Public can insert draft estimations"
     AND pdf_path IS NULL
     AND stripe_payment_intent_id IS NULL
     AND stripe_checkout_session_id IS NULL
-    -- Pour formule 2, exiger terms_accepted_at
-    AND (
-      formule IN ('formule_0', 'formule_1') 
-      OR (formule = 'formule_2' AND terms_accepted_at IS NOT NULL)
-    )
   );
 
 -- SELECT: admin only

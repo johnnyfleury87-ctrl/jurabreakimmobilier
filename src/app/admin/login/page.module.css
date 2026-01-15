@@ -64,7 +64,7 @@
   border-color: #2c5282;
 }
 
-button {
+.button {
   width: 100%;
   background: #2c5282;
   color: #fff;
@@ -78,11 +78,11 @@ button {
   margin-bottom: 1rem;
 }
 
-button:hover:not(:disabled) {
+.button:hover:not(:disabled) {
   background: #1a365d;
 }
 
-button:disabled {
+.button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }

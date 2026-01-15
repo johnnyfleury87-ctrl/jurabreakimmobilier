@@ -124,7 +124,7 @@ export default function EstimationPage() {
         
         {!selectedFormule ? (
           <div className={styles.formules}>
-            <h2>Choisissez votre formule</h2>
+            <h2 className={styles.formTitle}>Choisissez votre formule</h2>
             <div className={styles.grid}>
               {formules.map((formule) => (
                 <div key={formule.id} className={styles.formuleCard}>
@@ -214,7 +214,7 @@ export default function EstimationPage() {
                 </div>
               </div>
               
-              <h2>Votre bien</h2>
+              <h2 className={styles.formTitle}>Votre bien</h2>
               
               <div className={styles.field}>
                 <label htmlFor="adresse_bien">Adresse du bien *</label>

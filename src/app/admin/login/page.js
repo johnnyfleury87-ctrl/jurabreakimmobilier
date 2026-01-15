@@ -41,7 +41,7 @@ export default function LoginPage() {
     <div className={styles.loginPage}>
       <div className={styles.loginBox}>
         <h1>Administration</h1>
-        <p>Connectez-vous pour accéder au panneau d'administration</p>
+        <p>Connectez-vous pour accéder au panneau d&apos;administration</p>
         
         {error && (
           <div className={styles.error}>{error}</div>
@@ -70,7 +70,7 @@ export default function LoginPage() {
             />
           </div>
           
-          <button type="submit" disabled={loading}>
+          <button type="submit" disabled={loading} className={styles.button}>
             {loading ? 'Connexion...' : 'Se connecter'}
           </button>
         </form>
