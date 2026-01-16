@@ -2,124 +2,232 @@
   min-height: 100%;
 }
 
+/* ============================================
+   HERO SECTION - Fond vert avec motif géométrique
+   ============================================ */
+
 .hero {
-  background: linear-gradient(135deg, #2c5282 0%, #1a365d 100%);
-  color: #fff;
-  padding: 6rem 0;
-  text-align: center;
+  position: relative;
+  min-height: 100vh;
+  background: #2d6a4f; /* Vert professionnel */
+  overflow: hidden;
 }
 
-.hero h1 {
-  font-size: 3rem;
-  margin-bottom: 1rem;
+/* Motif géométrique hexagonal discret */
+.heroPattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.08;
+  background-image: 
+    repeating-linear-gradient(0deg, transparent, transparent 50px, rgba(255,255,255,0.1) 50px, rgba(255,255,255,0.1) 51px),
+    repeating-linear-gradient(60deg, transparent, transparent 50px, rgba(255,255,255,0.1) 50px, rgba(255,255,255,0.1) 51px),
+    repeating-linear-gradient(120deg, transparent, transparent 50px, rgba(255,255,255,0.1) 50px, rgba(255,255,255,0.1) 51px);
+  pointer-events: none;
 }
 
-.hero p {
-  font-size: 1.25rem;
-  margin-bottom: 2rem;
-  opacity: 0.9;
-}
-
-.cta {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-}
-
-.button {
-  background: #fff;
-  color: #2c5282;
-  padding: 1rem 2rem;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  transition: transform 0.2s;
-}
-
-.button:hover {
-  transform: translateY(-2px);
-}
-
-.buttonSecondary {
-  background: transparent;
-  color: #fff;
-  padding: 1rem 2rem;
-  border: 2px solid #fff;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  transition: background 0.2s;
-}
-
-.buttonSecondary:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.features {
-  padding: 4rem 0;
-  background: #f9fafb;
-}
-
-.features h2 {
-  text-align: center;
-  font-size: 2.5rem;
-  margin-bottom: 3rem;
-  color: #2c5282;
-}
-
-.grid {
+.heroContent {
+  position: relative;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  min-height: 100vh;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
 }
 
-.feature {
-  background: #fff;
-  padding: 2rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.feature h3 {
-  color: #2c5282;
-  margin-bottom: 1rem;
-}
-
-.about {
-  padding: 4rem 0;
-  text-align: center;
-}
-
-.about h2 {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-  color: #2c5282;
-}
-
-.about p {
-  font-size: 1.125rem;
-  margin-bottom: 1.5rem;
+.heroLeft {
+  z-index: 1;
   max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
-.link {
-  color: #2c5282;
+.heroRight {
+  /* Espace vide intentionnel pour respiration visuelle */
+  min-height: 400px;
+}
+
+.heroTitle {
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 1.5rem 0;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.heroSubtitle {
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0 0 2.5rem 0;
+  line-height: 1.6;
+  max-width: 500px;
+}
+
+.ctaButton {
+  display: inline-block;
+  background: #ffffff;
+  color: #2d6a4f;
+  padding: 1rem 2.5rem;
+  border-radius: 8px;
   font-weight: 600;
-  text-decoration: underline;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
 }
 
-@media (max-width: 768px) {
-  .hero h1 {
+.ctaButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* ============================================
+   SECTION PRÉSENTATION PERSONNELLE
+   ============================================ */
+
+.presentation {
+  background: #ffffff;
+  padding: 8rem 0;
+}
+
+.presentationContent {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.presentationLeft {
+  /* Colonne gauche volontairement vide (réservée pour futur visuel) */
+  min-height: 400px;
+}
+
+.presentationRight {
+  max-width: 600px;
+  justify-self: end;
+}
+
+.presentationIntro {
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #2d6a4f;
+  margin: 0 0 1rem 0;
+  font-weight: 600;
+}
+
+.presentationTitle {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 1.5rem 0;
+  line-height: 1.3;
+}
+
+.presentationText {
+  font-size: 1.125rem;
+  color: #4a4a4a;
+  margin: 0 0 2rem 0;
+  line-height: 1.7;
+}
+
+.secondaryButton {
+  display: inline-block;
+  background: transparent;
+  color: #2d6a4f;
+  padding: 0.875rem 2rem;
+  border: 2px solid #2d6a4f;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.secondaryButton:hover {
+  background: #2d6a4f;
+  color: #ffffff;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 968px) {
+  .heroContent,
+  .presentationContent {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding: 0 1.5rem;
+  }
+
+  .hero {
+    min-height: auto;
+    padding: 4rem 0;
+  }
+
+  .heroContent {
+    min-height: auto;
+  }
+
+  .heroRight,
+  .presentationLeft {
+    display: none;
+  }
+
+  .heroLeft {
+    max-width: 100%;
+  }
+
+  .heroTitle {
+    font-size: 2.5rem;
+  }
+
+  .heroSubtitle {
+    font-size: 1.125rem;
+  }
+
+  .presentation {
+    padding: 4rem 0;
+  }
+
+  .presentationRight {
+    max-width: 100%;
+    justify-self: start;
+  }
+
+  .presentationTitle {
     font-size: 2rem;
   }
-  
-  .cta {
-    flex-direction: column;
-    align-items: center;
+
+  .presentationText {
+    font-size: 1rem;
   }
-  
-  .features h2,
-  .about h2 {
+}
+
+@media (max-width: 640px) {
+  .heroTitle {
     font-size: 2rem;
+  }
+
+  .heroSubtitle {
+    font-size: 1rem;
+  }
+
+  .presentationTitle {
+    font-size: 1.75rem;
+  }
+
+  .ctaButton,
+  .secondaryButton {
+    width: 100%;
+    text-align: center;
   }
 }

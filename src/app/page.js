@@ -35,44 +35,41 @@ export default async function HomePage() {
   
   return (
     <div className={styles.home}>
+      {/* HERO SECTION - Fond vert avec motif géométrique */}
       <section className={styles.hero}>
-        <div className="container">
-          <h1>{heroTitle}</h1>
-          <p>{heroSubtitle}</p>
-          <div className={styles.cta}>
-            <Link href="/annonces" className={styles.button}>
-              Voir nos annonces
-            </Link>
-            <Link href="/estimation" className={styles.buttonSecondary}>
-              Estimer mon bien
+        <div className={styles.heroPattern}></div>
+        <div className={styles.heroContent}>
+          <div className={styles.heroLeft}>
+            <h1 className={styles.heroTitle}>
+              {heroTitle}
+            </h1>
+            <p className={styles.heroSubtitle}>
+              {heroSubtitle}
+            </p>
+            <Link href="/annonces" className={styles.ctaButton}>
+              Voir les annonces
             </Link>
           </div>
+          <div className={styles.heroRight}></div>
         </div>
       </section>
 
-      <section className={styles.features}>
-        <div className="container">
-          <h2>Nos Services</h2>
-          <div className={styles.grid}>
-            {services.length > 0 ? services.map((service, index) => (
-              <div key={index} className={styles.feature}>
-                <h3>{service.title}</h3>
-                <p>{service.description}</p>
-              </div>
-            )) : (
-              <p>Aucun service configuré.</p>
-            )}
+      {/* SECTION PRÉSENTATION PERSONNELLE */}
+      <section className={styles.presentation}>
+        <div className={styles.presentationContent}>
+          <div className={styles.presentationLeft}></div>
+          <div className={styles.presentationRight}>
+            <p className={styles.presentationIntro}>Bonjour</p>
+            <h2 className={styles.presentationTitle}>
+              Votre partenaire immobilier dans le Jura
+            </h2>
+            <p className={styles.presentationText}>
+              {aboutText}
+            </p>
+            <Link href="/a-propos" className={styles.secondaryButton}>
+              En savoir plus
+            </Link>
           </div>
-        </div>
-      </section>
-
-      <section className={styles.about}>
-        <div className="container">
-          <h2>À Propos</h2>
-          <p>{aboutText}</p>
-          <Link href="/a-propos" className={styles.link}>
-            En savoir plus →
-          </Link>
         </div>
       </section>
     </div>
