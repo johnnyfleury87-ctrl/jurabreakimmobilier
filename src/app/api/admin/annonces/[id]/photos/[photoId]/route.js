@@ -1,21 +1,13 @@
-import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
-import { isAdminEmail } from '@/lib/auth/config'
+import { checkApiAdminAuth } from '@/lib/auth/apiAuth'
 
 // DELETE: Supprimer une photo
 export async function DELETE(request, { params }) {
   try {
-    const supabase = await createClient()
-    const { id, photoId } = await params
+    const { supabase, user, error: authError } = await checkApiAdminAuth()
+    if (authError) return authError
     
-    // Vérifier auth
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user || !isAdminEmail(user.email)) {
-      return NextResponse.json(
-        { error: 'Non autorisé' },
-        { status: 401 }
-      )
-    }
+    const { id, photoId } = await params
     
     // Récupérer la photo
     const { data: photo, error: photoError } = await supabase

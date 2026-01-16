@@ -1,23 +1,15 @@
-import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
-import { isAdminEmail } from '@/lib/auth/config'
+import { checkApiAdminAuth } from '@/lib/auth/apiAuth'
 import { calculerHonoraires } from '@/lib/honoraires'
 import { revalidatePath } from 'next/cache'
 
 // GET: Récupérer une annonce spécifique
 export async function GET(request, { params }) {
   try {
-    const supabase = await createClient()
-    const { id } = await params
+    const { supabase, user, error: authError } = await checkApiAdminAuth()
+    if (authError) return authError
     
-    // Vérifier auth
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user || !isAdminEmail(user.email)) {
-      return NextResponse.json(
-        { error: 'Non autorisé' },
-        { status: 401 }
-      )
-    }
+    const { id } = await params
     
     const { data: annonce, error } = await supabase
       .from('annonces')
@@ -50,17 +42,10 @@ export async function GET(request, { params }) {
 // PUT: Mettre à jour une annonce
 export async function PUT(request, { params }) {
   try {
-    const supabase = await createClient()
-    const { id } = await params
+    const { supabase, user, error: authError } = await checkApiAdminAuth()
+    if (authError) return authError
     
-    // Vérifier auth
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user || !isAdminEmail(user.email)) {
-      return NextResponse.json(
-        { error: 'Non autorisé' },
-        { status: 401 }
-      )
-    }
+    const { id } = await params
     
     const body = await request.json()
     
@@ -172,17 +157,10 @@ export async function PUT(request, { params }) {
 // DELETE: Supprimer une annonce (soft delete)
 export async function DELETE(request, { params }) {
   try {
-    const supabase = await createClient()
-    const { id } = await params
+    const { supabase, user, error: authError } = await checkApiAdminAuth()
+    if (authError) return authError
     
-    // Vérifier auth
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user || !isAdminEmail(user.email)) {
-      return NextResponse.json(
-        { error: 'Non autorisé' },
-        { status: 401 }
-      )
-    }
+    const { id } = await params
     
     // Soft delete
     const { error } = await supabase

@@ -1,48 +1,13 @@
-import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
-import { isAdminEmail } from '@/lib/auth/config'
+import { checkApiAdminAuth } from '@/lib/auth/apiAuth'
 import { calculerHonoraires } from '@/lib/honoraires'
 import { revalidatePath } from 'next/cache'
 
 // GET: Liste toutes les annonces (admin seulement)
 export async function GET(request) {
   try {
-    const supabase = await createClient()
-    
-    // Vérifier auth avec logs détaillés
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
-    console.log('🔍 GET /api/admin/annonces - Auth check:', {
-      hasUser: !!user,
-      email: user?.email,
-      authError: authError?.message
-    })
-    
-    if (authError) {
-      console.error('❌ Auth error:', authError)
-      return NextResponse.json(
-        { error: 'Erreur d\'authentification', details: authError.message },
-        { status: 401 }
-      )
-    }
-    
-    if (!user) {
-      console.error('❌ Pas d\'utilisateur')
-      return NextResponse.json(
-        { error: 'Non authentifié - aucun utilisateur détecté' },
-        { status: 401 }
-      )
-    }
-    
-    if (!isAdminEmail(user.email)) {
-      console.error('❌ Email non autorisé:', user.email)
-      return NextResponse.json(
-        { error: 'Non autorisé - email non dans l\'allowlist', email: user.email },
-        { status: 403 }
-      )
-    }
-    
-    console.log('✅ Admin autorisé:', user.email)
+    const { supabase, user, error: authError, devBypass } = await checkApiAdminAuth()
+    if (authError) return authError
     
     // Récupérer toutes les annonces (y compris supprimées pour l'admin)
     const { data: annonces, error } = await supabase
@@ -73,16 +38,8 @@ export async function GET(request) {
 // POST: Créer une nouvelle annonce
 export async function POST(request) {
   try {
-    const supabase = await createClient()
-    
-    // Vérifier auth
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user || !isAdminEmail(user.email)) {
-      return NextResponse.json(
-        { error: 'Non autorisé' },
-        { status: 401 }
-      )
-    }
+    const { supabase, user, error: authError, devBypass } = await checkApiAdminAuth()
+    if (authError) return authError
     
     const body = await request.json()
     
