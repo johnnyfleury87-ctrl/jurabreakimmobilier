@@ -1,5 +1,9 @@
 import { requireAdmin, AccessDenied, ConfigMissing } from '@/lib/auth/requireAdmin'
 
+// Force dynamic rendering car on utilise cookies/session
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function AdminLayout({ children }) {
   // IMPORTANT: Ne PAS mettre requireAdmin() dans un try-catch
   // car redirect() lance une exception qui doit être propagée

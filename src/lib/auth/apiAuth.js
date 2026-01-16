@@ -55,21 +55,40 @@ export async function checkApiAdminAuth() {
   
   console.log('✅ User détecté:', { id: user.id, email: user.email })
   
-  // Vérifier allowlist admin (indépendant de la table profiles)
-  const ADMIN_EMAILS = ['lolita@jurabreak.fr', 'contact@jurabreak.fr']
+  // Vérifier le rôle dans la table profiles
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
   
-  if (!ADMIN_EMAILS.includes(user.email?.toLowerCase())) {
-    console.error('❌ NOT_ALLOWED:', user.email, '- Email non dans allowlist')
+  if (profileError) {
+    console.error('❌ PROFILE_ERROR:', profileError.message)
+    // Fallback sur allowlist si profile n'existe pas encore
+    const ADMIN_EMAILS = ['lolita@jurabreak.fr', 'contact@jurabreak.fr']
+    if (!ADMIN_EMAILS.includes(user.email?.toLowerCase())) {
+      return {
+        supabase,
+        user: null,
+        error: NextResponse.json(
+          { error: 'Profil non trouvé', details: 'Veuillez contacter l\'administrateur' },
+          { status: 403 }
+        )
+      }
+    }
+    console.warn('⚠️ Profil non trouvé mais email dans allowlist, accès autorisé')
+  } else if (profile && profile.role !== 'admin') {
+    console.error('❌ NOT_ADMIN:', user.email, 'Role:', profile.role)
     return {
       supabase,
       user: null,
       error: NextResponse.json(
-        { error: 'Accès refusé', details: 'Email non autorisé' },
+        { error: 'Accès refusé', details: 'Permissions insuffisantes' },
         { status: 403 }
       )
     }
   }
   
-  console.log('✅ ADMIN_OK:', user.email)
-  return { supabase, user, error: null, devBypass: false }
+  console.log('✅ ADMIN_OK:', user.email, 'Role:', profile?.role || 'fallback-allowlist')
+  return { supabase, user, error: null, devBypass: false, profile }
 }

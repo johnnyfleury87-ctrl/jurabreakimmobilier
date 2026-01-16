@@ -3,6 +3,10 @@ import { checkApiAdminAuth } from '@/lib/auth/apiAuth'
 import { calculerHonoraires } from '@/lib/honoraires'
 import { revalidatePath } from 'next/cache'
 
+// Force dynamic rendering car on utilise cookies/session
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 // GET: Récupérer une annonce spécifique
 export async function GET(request, { params }) {
   try {

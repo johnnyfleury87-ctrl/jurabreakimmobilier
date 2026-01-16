@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server'
 import { checkApiAdminAuth } from '@/lib/auth/apiAuth'
 
+// Force dynamic rendering car on utilise cookies/session
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 // DELETE: Supprimer une photo
 export async function DELETE(request, { params }) {
   try {

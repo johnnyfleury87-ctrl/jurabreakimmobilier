@@ -2,6 +2,10 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import styles from './page.module.css'
 
+// Force dynamic rendering car on utilise auth/session
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function AdminDashboard() {
   try {
     const supabase = await createClient()

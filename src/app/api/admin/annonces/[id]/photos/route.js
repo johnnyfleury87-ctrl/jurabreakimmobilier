@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server'
 import { checkApiAdminAuth } from '@/lib/auth/apiAuth'
 
+// Force dynamic rendering car on utilise cookies/session
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 // POST: Upload une photo pour une annonce
 export async function POST(request, { params }) {
   try {
