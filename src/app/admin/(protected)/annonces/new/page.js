@@ -138,6 +138,7 @@ export default function NewAnnoncePage() {
       const response = await fetch('/api/admin/annonces', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(annonceData)
       })
 
@@ -159,6 +160,7 @@ export default function NewAnnoncePage() {
 
           await fetch(`/api/admin/annonces/${annonce.id}/photos`, {
             method: 'POST',
+            credentials: 'include',
             body: formDataPhoto
           })
         }

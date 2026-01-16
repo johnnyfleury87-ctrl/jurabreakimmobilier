@@ -42,7 +42,9 @@ export default function EditAnnoncePage() {
   async function fetchAnnonce() {
     try {
       setLoading(true)
-      const response = await fetch(`/api/admin/annonces/${id}`)
+      const response = await fetch(`/api/admin/annonces/${id}`, {
+        credentials: 'include'
+      })
       
       if (!response.ok) {
         throw new Error('Erreur lors du chargement de l\'annonce')
@@ -136,7 +138,8 @@ export default function EditAnnoncePage() {
 
     try {
       const response = await fetch(`/api/admin/annonces/${id}/photos/${photoId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        credentials: 'include'
       })
 
       if (!response.ok) {
@@ -184,6 +187,7 @@ export default function EditAnnoncePage() {
       const response = await fetch(`/api/admin/annonces/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(annonceData)
       })
 
@@ -205,6 +209,7 @@ export default function EditAnnoncePage() {
 
           await fetch(`/api/admin/annonces/${id}/photos`, {
             method: 'POST',
+            credentials: 'include',
             body: formDataPhoto
           })
         }

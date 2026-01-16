@@ -20,11 +20,17 @@ export async function checkApiAdminAuth() {
     return { supabase, user: null, error: null, devBypass: true }
   }
   
-  // Vérifier auth
+  console.log('🔍 Vérification auth API...')
+  
+  // Vérifier auth avec logs détaillés
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   
   if (authError) {
-    console.error('❌ Auth error:', authError.message)
+    console.error('❌ AUTH_ERROR:', {
+      message: authError.message,
+      status: authError.status,
+      name: authError.name
+    })
     return {
       supabase,
       user: null,
@@ -36,29 +42,34 @@ export async function checkApiAdminAuth() {
   }
   
   if (!user) {
-    console.error('❌ Pas d\'utilisateur')
+    console.error('❌ NO_USER - Session manquante ou expirée')
     return {
       supabase,
       user: null,
       error: NextResponse.json(
-        { error: 'Non authentifié - aucun utilisateur détecté' },
+        { error: 'Session manquante', details: 'Veuillez vous connecter via /admin/login' },
         { status: 401 }
       )
     }
   }
   
-  if (!isAdminEmail(user.email)) {
-    console.error('❌ Email non autorisé:', user.email)
+  console.log('✅ User détecté:', { id: user.id, email: user.email })
+  
+  // Vérifier allowlist admin (indépendant de la table profiles)
+  const ADMIN_EMAILS = ['lolita@jurabreak.fr', 'contact@jurabreak.fr']
+  
+  if (!ADMIN_EMAILS.includes(user.email?.toLowerCase())) {
+    console.error('❌ NOT_ALLOWED:', user.email, '- Email non dans allowlist')
     return {
       supabase,
       user: null,
       error: NextResponse.json(
-        { error: 'Non autorisé - email non dans l\'allowlist', email: user.email },
+        { error: 'Accès refusé', details: 'Email non autorisé' },
         { status: 403 }
       )
     }
   }
   
-  console.log('✅ Admin autorisé:', user.email)
+  console.log('✅ ADMIN_OK:', user.email)
   return { supabase, user, error: null, devBypass: false }
 }

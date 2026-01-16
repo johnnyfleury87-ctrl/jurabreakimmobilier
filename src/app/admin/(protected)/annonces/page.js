@@ -18,10 +18,19 @@ export default function AdminAnnoncesPage() {
   async function fetchAnnonces() {
     try {
       setLoading(true)
-      const response = await fetch('/api/admin/annonces')
+      const response = await fetch('/api/admin/annonces', {
+        credentials: 'include' // CRUCIAL: passer les cookies de session
+      })
       
       if (!response.ok) {
-        throw new Error('Erreur lors du chargement des annonces')
+        const errorData = await response.json().catch(() => ({}))
+        
+        // Si 401, c'est un problème de session
+        if (response.status === 401) {
+          throw new Error('Session expirée. Veuillez vous reconnecter.')
+        }
+        
+        throw new Error(errorData.error || 'Erreur lors du chargement des annonces')
       }
       
       const data = await response.json()
@@ -40,7 +49,8 @@ export default function AdminAnnoncesPage() {
 
     try {
       const response = await fetch(`/api/admin/annonces/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        credentials: 'include'
       })
 
       if (!response.ok) {
@@ -81,6 +91,7 @@ export default function AdminAnnoncesPage() {
       const response = await fetch(`/api/admin/annonces/${annonce.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           ...annonce,
           statut: newStatut
@@ -107,6 +118,7 @@ export default function AdminAnnoncesPage() {
       const response = await fetch('/api/admin/annonces', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           titre: `Maison test - ${new Date().toLocaleString('fr-FR')}`,
           type_bien: 'maison',
