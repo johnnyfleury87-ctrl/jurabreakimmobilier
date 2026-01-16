@@ -10,7 +10,7 @@ export default function Header() {
           <Image 
             src="/images/branding/logo-jurabreak.png" 
             alt="JuraBreak Immobilier - Logo" 
-            width={160}
+            width={50}
             height={48}
             priority
             className={styles.logoImage}
