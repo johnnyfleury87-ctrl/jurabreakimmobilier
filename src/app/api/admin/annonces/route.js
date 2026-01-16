@@ -9,14 +9,40 @@ export async function GET(request) {
   try {
     const supabase = await createClient()
     
-    // Vérifier auth
+    // Vérifier auth avec logs détaillés
     const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user || !isAdminEmail(user.email)) {
+    
+    console.log('🔍 GET /api/admin/annonces - Auth check:', {
+      hasUser: !!user,
+      email: user?.email,
+      authError: authError?.message
+    })
+    
+    if (authError) {
+      console.error('❌ Auth error:', authError)
       return NextResponse.json(
-        { error: 'Non autorisé' },
+        { error: 'Erreur d\'authentification', details: authError.message },
         { status: 401 }
       )
     }
+    
+    if (!user) {
+      console.error('❌ Pas d\'utilisateur')
+      return NextResponse.json(
+        { error: 'Non authentifié - aucun utilisateur détecté' },
+        { status: 401 }
+      )
+    }
+    
+    if (!isAdminEmail(user.email)) {
+      console.error('❌ Email non autorisé:', user.email)
+      return NextResponse.json(
+        { error: 'Non autorisé - email non dans l\'allowlist', email: user.email },
+        { status: 403 }
+      )
+    }
+    
+    console.log('✅ Admin autorisé:', user.email)
     
     // Récupérer toutes les annonces (y compris supprimées pour l'admin)
     const { data: annonces, error } = await supabase
@@ -27,11 +53,16 @@ export async function GET(request) {
       `)
       .order('created_at', { ascending: false })
     
-    if (error) throw error
+    if (error) {
+      console.error('❌ Erreur DB:', error)
+      throw error
+    }
+    
+    console.log(`✅ ${annonces?.length || 0} annonces récupérées`)
     
     return NextResponse.json({ annonces })
   } catch (error) {
-    console.error('Erreur GET /api/admin/annonces:', error)
+    console.error('❌ Erreur GET /api/admin/annonces:', error)
     return NextResponse.json(
       { error: error.message },
       { status: 500 }
