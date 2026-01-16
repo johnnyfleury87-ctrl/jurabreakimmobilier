@@ -4,10 +4,11 @@ import { isAdminEmail } from './config'
 
 /**
  * Vérifie que l'utilisateur est admin et authentifié
+ * @param {string} pathname - Chemin actuel (pour éviter redirect loop)
  * @returns {Promise<{user, devBypass}>} - User Supabase ou null si bypass dev
  * @throws {redirect} - Redirige vers /admin/login si non connecté (NE PAS CATCH)
  */
-export async function requireAdmin() {
+export async function requireAdmin(pathname = '') {
   // MODE DEV BYPASS : Permet l'accès admin sans auth en développement
   const devBypassEnabled = process.env.NEXT_PUBLIC_DEV_ADMIN_BYPASS === 'true'
   
@@ -31,9 +32,13 @@ export async function requireAdmin() {
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   
   // Si erreur auth ou pas d'utilisateur => redirect login
-  // IMPORTANT: Ne PAS mettre redirect() dans un try-catch
+  // MAIS ne pas rediriger si on est déjà sur /admin/login (avoid loop)
   if (authError || !user) {
-    redirect('/admin/login')
+    if (!pathname.includes('/admin/login')) {
+      redirect('/admin/login')
+    }
+    // Si on est déjà sur /admin/login, retourner null
+    return { user: null, devBypass: false, needsAuth: true }
   }
   
   // Vérifier l'allowlist
@@ -41,7 +46,7 @@ export async function requireAdmin() {
     throw new Error('UNAUTHORIZED')
   }
   
-  return { user, devBypass: false }
+  return { user, devBypass: false, needsAuth: false }
 }
 
 /**

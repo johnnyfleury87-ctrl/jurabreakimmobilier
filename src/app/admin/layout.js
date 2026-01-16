@@ -4,6 +4,8 @@ export default async function AdminLayout({ children }) {
   // IMPORTANT: Ne PAS mettre requireAdmin() dans un try-catch
   // car redirect() lance une exception qui doit être propagée
   
+  // Note: /admin/login a son propre layout qui bypasse ce guard
+  
   let adminCheck
   try {
     adminCheck = await requireAdmin()

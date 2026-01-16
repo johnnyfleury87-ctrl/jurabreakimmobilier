@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import styles from './page.module.css'
@@ -13,9 +13,35 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+  const [debugInfo, setDebugInfo] = useState(null)
   
   // Mode DEV BYPASS détecté
   const devBypass = process.env.NEXT_PUBLIC_DEV_ADMIN_BYPASS === 'true'
+  
+  // Debug info au chargement
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        setDebugInfo({
+          bypass: devBypass,
+          hasUser: !!user,
+          userEmail: user?.email || 'non connecté',
+          env: process.env.NODE_ENV
+        })
+      } catch (e) {
+        setDebugInfo({
+          bypass: devBypass,
+          hasUser: false,
+          userEmail: 'erreur',
+          env: process.env.NODE_ENV,
+          error: e.message
+        })
+      }
+    }
+    checkAuth()
+  }, [])
   
   const handlePasswordLogin = async (e) => {
     e.preventDefault()
@@ -74,6 +100,24 @@ export default function LoginPage() {
 
   return (
     <div className={styles.loginPage}>
+      {/* DEBUG INFO - Visible en dev */}
+      {process.env.NODE_ENV === 'development' && debugInfo && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          right: 0,
+          backgroundColor: '#1f2937',
+          color: '#10b981',
+          padding: '0.5rem',
+          fontSize: '0.75rem',
+          fontFamily: 'monospace',
+          zIndex: 10000,
+          borderBottomLeftRadius: '8px'
+        }}>
+          ENV bypass: {String(debugInfo.bypass)} | User: {debugInfo.hasUser ? '✓' : '✗'} | Email: {debugInfo.userEmail}
+        </div>
+      )}
+      
       <div className={styles.loginBox}>
         <h1>Administration</h1>
         <p className={styles.subtitle}>
