@@ -105,8 +105,25 @@
 }
 
 .presentationLeft {
-  /* Colonne gauche volontairement vide (réservée pour futur visuel) */
+  /* Colonne gauche avec photo de Lolita */
+  display: flex;
+  align-items: center;
+  justify-content: center;
   min-height: 400px;
+}
+
+.imageWrapper {
+  position: relative;
+  width: 300px;
+  height: 300px;
+}
+
+.teamImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .presentationRight {
@@ -177,9 +194,20 @@
     min-height: auto;
   }
 
-  .heroRight,
-  .presentationLeft {
+  .heroRight {
     display: none;
+  }
+  
+  .presentationLeft {
+    display: flex;
+    justify-content: center;
+    min-height: auto;
+    margin-bottom: 2rem;
+  }
+  
+  .imageWrapper {
+    width: 240px;
+    height: 240px;
   }
 
   .heroLeft {
@@ -223,6 +251,11 @@
 
   .presentationTitle {
     font-size: 1.75rem;
+  }
+  
+  .imageWrapper {
+    width: 200px;
+    height: 200px;
   }
 
   .ctaButton,

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import styles from './page.module.css'
 import { createClient } from '@/lib/supabase/server'
 
@@ -57,7 +58,18 @@ export default async function HomePage() {
       {/* SECTION PRÉSENTATION PERSONNELLE */}
       <section className={styles.presentation}>
         <div className={styles.presentationContent}>
-          <div className={styles.presentationLeft}></div>
+          <div className={styles.presentationLeft}>
+            <div className={styles.imageWrapper}>
+              <Image 
+                src="/images/team/lolita.png"
+                alt="Lolita - Agent immobilier JuraBreak"
+                width={300}
+                height={300}
+                className={styles.teamImage}
+                priority
+              />
+            </div>
+          </div>
           <div className={styles.presentationRight}>
             <p className={styles.presentationIntro}>Bonjour</p>
             <h2 className={styles.presentationTitle}>

@@ -17,6 +17,20 @@
 }
 
 .logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+}
+
+.logoImage {
+  height: auto;
+  width: auto;
+  max-height: 48px;
+  object-fit: contain;
+}
+
+.logoText {
   font-size: 1.5rem;
   font-weight: bold;
   color: #2d6a4f;
@@ -54,10 +68,22 @@
   .adminLink {
     display: none;
   }
+  
+  .logoText {
+    font-size: 1.25rem;
+  }
 }
 
 @media (max-width: 768px) {
   .nav {
     display: none;
+  }
+  
+  .logoImage {
+    max-height: 40px;
+  }
+  
+  .logoText {
+    font-size: 1.125rem;
   }
 }
