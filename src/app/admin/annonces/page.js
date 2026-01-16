@@ -97,6 +97,51 @@ export default function AdminAnnoncesPage() {
     }
   }
 
+  async function createTestAnnonce() {
+    if (!confirm('Créer une annonce de test ?')) {
+      return
+    }
+
+    try {
+      setLoading(true)
+      const response = await fetch('/api/admin/annonces', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          titre: `Maison test - ${new Date().toLocaleString('fr-FR')}`,
+          type_bien: 'maison',
+          type_transaction: 'VENTE',
+          description: 'Ceci est une annonce de test créée automatiquement pour valider le système.',
+          points_forts: ['Test fonctionnel', 'Création rapide', 'Validation système'],
+          ville: 'Lons-le-Saunier',
+          code_postal: '39000',
+          secteur: 'Centre-ville',
+          prix: 250000,
+          surface_m2: 120,
+          terrain_m2: 500,
+          nb_pieces: 5,
+          nb_chambres: 3,
+          nb_salles_bain: 1,
+          statut: 'A_VENDRE',
+          visible: true,
+          published_at: new Date().toISOString()
+        })
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Erreur lors de la création')
+      }
+
+      alert('✅ Annonce test créée avec succès !')
+      fetchAnnonces()
+    } catch (err) {
+      alert('❌ Erreur: ' + err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const filteredAnnonces = annonces.filter(a => {
     if (filter === 'all') return true
     if (filter === 'visible') return a.visible && !a.is_deleted
@@ -128,9 +173,18 @@ export default function AdminAnnoncesPage() {
           <h1>Gestion des annonces</h1>
           <p className={styles.subtitle}>{filteredAnnonces.length} annonce(s)</p>
         </div>
-        <Link href="/admin/annonces/new" className={styles.btnPrimary}>
-          + Nouvelle annonce
-        </Link>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button 
+            onClick={createTestAnnonce} 
+            className={styles.btnSecondary}
+            disabled={loading}
+          >
+            🧪 Annonce test
+          </button>
+          <Link href="/admin/annonces/new" className={styles.btnPrimary}>
+            + Nouvelle annonce
+          </Link>
+        </div>
       </div>
 
       <div className={styles.filters}>

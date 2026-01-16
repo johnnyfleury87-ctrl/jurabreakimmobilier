@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { isAdminEmail } from '@/lib/auth/config'
+import { calculerHonoraires } from '@/lib/honoraires'
+import { revalidatePath } from 'next/cache'
 
 // GET: Liste toutes les annonces (admin seulement)
 export async function GET(request) {
@@ -53,14 +55,28 @@ export async function POST(request) {
     
     const body = await request.json()
     
+    // Calculer automatiquement les honoraires
+    const honorairesCalcules = calculerHonoraires({
+      typeTransaction: body.type_transaction || 'VENTE',
+      typeBien: body.type_bien,
+      prix: parseFloat(body.prix) || 0,
+      loyerHC: parseFloat(body.loyer_hc) || 0,
+      surfaceM2: parseFloat(body.surface_m2) || 0
+    })
+    
     // Générer un slug unique si non fourni
     let slug = body.slug
     if (!slug) {
-      const { data: slugData, error: slugError } = await supabase
-        .rpc('generate_unique_slug', { titre: body.titre })
+      // Créer un slug simple basé sur le titre
+      const baseSlug = body.titre
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') // Enlever les accents
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '')
       
-      if (slugError) throw slugError
-      slug = slugData
+      // Ajouter un timestamp pour garantir l'unicité
+      slug = `${baseSlug}-${Date.now()}`
     }
     
     // Préparer les données de l'annonce
@@ -115,11 +131,12 @@ export async function POST(request) {
       
       statut: body.statut || 'A_VENDRE',
       visible: body.visible !== undefined ? body.visible : true,
-      published_at: body.visible ? new Date().toISOString() : null,
+      published_at: body.published_at || (body.visible ? new Date().toISOString() : null),
       
-      honoraires_transaction: body.honoraires_transaction,
-      honoraires_location: body.honoraires_location,
-      honoraires_etat_lieux: body.honoraires_etat_lieux,
+      // Honoraires calculés automatiquement
+      honoraires_transaction: honorairesCalcules.type === 'VENTE' ? honorairesCalcules.total : null,
+      honoraires_location: honorairesCalcules.type === 'LOCATION' ? honorairesCalcules.honorairesLocation : null,
+      honoraires_etat_lieux: honorairesCalcules.type === 'LOCATION' ? honorairesCalcules.honorairesEtatLieux : null,
       
       ordre_affichage: body.ordre_affichage || 0
     }
@@ -133,9 +150,18 @@ export async function POST(request) {
     
     if (error) throw error
     
+    // Revalider le cache des pages publiques
+    try {
+      revalidatePath('/annonces')
+      revalidatePath(`/annonces/${annonce.slug}`)
+    } catch (revalError) {
+      console.error('Erreur revalidation:', revalError)
+    }
+    
     return NextResponse.json({ 
       annonce,
-      message: 'Annonce créée avec succès' 
+      message: 'Annonce créée avec succès',
+      honoraires: honorairesCalcules
     }, { status: 201 })
     
   } catch (error) {

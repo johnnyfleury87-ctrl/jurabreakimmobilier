@@ -41,6 +41,29 @@
   background: #1b4332;
 }
 
+.btnSecondary {
+  background: #f0f0f0;
+  color: #333;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s;
+  border: 2px solid #e0e0e0;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.btnSecondary:hover {
+  background: #e0e0e0;
+  border-color: #ccc;
+}
+
+.btnSecondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .filters {
   display: flex;
   gap: 0.5rem;

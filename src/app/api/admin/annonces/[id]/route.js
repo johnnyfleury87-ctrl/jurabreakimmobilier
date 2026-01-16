@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { isAdminEmail } from '@/lib/auth/config'
+import { calculerHonoraires } from '@/lib/honoraires'
+import { revalidatePath } from 'next/cache'
 
 // GET: Récupérer une annonce spécifique
 export async function GET(request, { params }) {
@@ -62,6 +64,15 @@ export async function PUT(request, { params }) {
     
     const body = await request.json()
     
+    // Recalculer les honoraires si les données financières ont changé
+    const honorairesCalcules = calculerHonoraires({
+      typeTransaction: body.type_transaction || 'VENTE',
+      typeBien: body.type_bien,
+      prix: parseFloat(body.prix) || 0,
+      loyerHC: parseFloat(body.loyer_hc) || 0,
+      surfaceM2: parseFloat(body.surface_m2) || 0
+    })
+    
     // Préparer les données de mise à jour
     const updateData = {
       titre: body.titre,
@@ -116,11 +127,13 @@ export async function PUT(request, { params }) {
       visible: body.visible,
       published_at: body.visible && !body.published_at ? new Date().toISOString() : body.published_at,
       
-      honoraires_transaction: body.honoraires_transaction,
-      honoraires_location: body.honoraires_location,
-      honoraires_etat_lieux: body.honoraires_etat_lieux,
+      // Honoraires recalculés automatiquement
+      honoraires_transaction: honorairesCalcules.type === 'VENTE' ? honorairesCalcules.total : null,
+      honoraires_location: honorairesCalcules.type === 'LOCATION' ? honorairesCalcules.honorairesLocation : null,
+      honoraires_etat_lieux: honorairesCalcules.type === 'LOCATION' ? honorairesCalcules.honorairesEtatLieux : null,
       
-      ordre_affichage: body.ordre_affichage || 0
+      ordre_affichage: body.ordre_affichage || 0,
+      updated_at: new Date().toISOString()
     }
     
     // Mettre à jour
@@ -133,9 +146,18 @@ export async function PUT(request, { params }) {
     
     if (error) throw error
     
+    // Revalider le cache
+    try {
+      revalidatePath('/annonces')
+      revalidatePath(`/annonces/${annonce.slug}`)
+    } catch (revalError) {
+      console.error('Erreur revalidation:', revalError)
+    }
+    
     return NextResponse.json({ 
       annonce,
-      message: 'Annonce mise à jour avec succès' 
+      message: 'Annonce mise à jour avec succès',
+      honoraires: honorairesCalcules
     })
     
   } catch (error) {
@@ -173,6 +195,13 @@ export async function DELETE(request, { params }) {
       .eq('id', id)
     
     if (error) throw error
+    
+    // Revalider le cache
+    try {
+      revalidatePath('/annonces')
+    } catch (revalError) {
+      console.error('Erreur revalidation:', revalError)
+    }
     
     return NextResponse.json({ 
       message: 'Annonce supprimée avec succès' 
