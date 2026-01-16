@@ -13,18 +13,6 @@
   overflow: hidden;
 }
 
-/* Vidéo d'arrière-plan */
-.heroVideo {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  pointer-events: none;
-  z-index: 0;
-}
-
 /* Overlay vert par-dessus la vidéo */
 .heroOverlay {
   position: absolute;

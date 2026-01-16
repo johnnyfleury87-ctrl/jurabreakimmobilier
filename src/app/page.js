@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui'
+import HeroVideo from '@/components/HeroVideo'
 import styles from './page.module.css'
 import { createClient } from '@/lib/supabase/server'
 
@@ -40,16 +41,7 @@ export default async function HomePage() {
       {/* HERO SECTION - Fond vert avec motif géométrique */}
       <section className={styles.hero}>
         {/* Vidéo d'arrière-plan */}
-        <video
-          className={styles.heroVideo}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-        >
-          <source src="/videos/hero.mp4" type="video/mp4" />
-        </video>
+        <HeroVideo />
         
         {/* Overlay vert */}
         <div className={styles.heroOverlay}></div>
