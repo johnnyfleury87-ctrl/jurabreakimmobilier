@@ -1,132 +1,49 @@
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
-import { isAdminEmail } from '@/lib/auth/config'
-import Link from 'next/link'
+import { requireAdmin, AccessDenied, ConfigMissing } from '@/lib/auth/requireAdmin'
 
 export default async function AdminLayout({ children }) {
+  // IMPORTANT: Ne PAS mettre requireAdmin() dans un try-catch
+  // car redirect() lance une exception qui doit être propagée
+  
+  let adminCheck
   try {
-    // Vérifier les variables d'environnement
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-      return (
-        <div style={{ 
-          minHeight: '100vh', 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center',
-          flexDirection: 'column',
-          gap: '1rem',
-          padding: '2rem'
-        }}>
-          <h1 style={{ fontSize: '2rem', color: '#dc2626' }}>❌ Configuration manquante</h1>
-          <p style={{ color: '#666', textAlign: 'center' }}>
-            Les variables d&apos;environnement Supabase ne sont pas configurées.<br/>
-            Vérifiez votre fichier .env.local
-          </p>
-          <Link 
-            href="/" 
-            style={{ 
-              marginTop: '1rem', 
-              color: '#2d6a4f', 
-              textDecoration: 'underline' 
-            }}
-          >
-            ← Retour au site
-          </Link>
-        </div>
-      )
+    adminCheck = await requireAdmin()
+  } catch (error) {
+    // Gérer uniquement les erreurs spécifiques (pas NEXT_REDIRECT)
+    if (error.message === 'CONFIG_MISSING') {
+      return <ConfigMissing />
     }
+    if (error.message === 'UNAUTHORIZED') {
+      return <AccessDenied />
+    }
+    // Pour toute autre erreur, la relancer (incluant NEXT_REDIRECT)
+    throw error
+  }
 
-    const supabase = await createClient()
-    
-    // Vérifier l'authentification
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
-    if (authError) {
-      console.error('Erreur auth admin:', authError)
-      redirect('/admin/login')
-    }
-    
-    if (!user) {
-      redirect('/admin/login')
-    }
-    
-    // Vérifier si l'email est autorisé
-    if (!isAdminEmail(user.email)) {
-      return (
-        <div style={{ 
-          minHeight: '100vh', 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center',
-          flexDirection: 'column',
-          gap: '1rem',
-          padding: '2rem'
+  const { user, devBypass, email } = adminCheck
+
+  return (
+    <div>
+      {devBypass && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          backgroundColor: '#fef3c7',
+          color: '#92400e',
+          padding: '0.5rem',
+          textAlign: 'center',
+          fontSize: '0.875rem',
+          fontWeight: 'bold',
+          zIndex: 9999,
+          borderBottom: '2px solid #f59e0b'
         }}>
-          <h1 style={{ fontSize: '2rem', color: '#dc2626' }}>🚫 Accès non autorisé</h1>
-          <p style={{ color: '#666', textAlign: 'center' }}>
-            Votre compte ({user.email}) n&apos;a pas les permissions nécessaires pour accéder à l&apos;administration.
-          </p>
-          <p style={{ color: '#999', fontSize: '0.875rem', marginTop: '0.5rem' }}>
-            Emails autorisés : contact@jurabreak.fr, lolita@jurabreak.fr
-          </p>
-          <Link 
-            href="/" 
-            style={{ 
-              marginTop: '1rem', 
-              color: '#2d6a4f', 
-              textDecoration: 'underline' 
-            }}
-          >
-            ← Retour au site
-          </Link>
+          ⚠️ DEV ADMIN BYPASS ACTIF - Mode développement uniquement
         </div>
-      )
-    }
-    
-    return (
-      <div>
+      )}
+      <div style={devBypass ? { marginTop: '2.5rem' } : {}}>
         {children}
       </div>
-    )
-  } catch (error) {
-    console.error('Erreur critique AdminLayout:', error)
-    return (
-      <div style={{ 
-        minHeight: '100vh', 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center',
-        flexDirection: 'column',
-        gap: '1rem',
-        padding: '2rem'
-      }}>
-        <h1 style={{ fontSize: '2rem', color: '#dc2626' }}>⚠️ Erreur système</h1>
-        <p style={{ color: '#666', textAlign: 'center' }}>
-          Une erreur est survenue lors de la vérification des permissions.
-        </p>
-        <p style={{ 
-          fontFamily: 'monospace', 
-          fontSize: '0.875rem', 
-          color: '#999',
-          backgroundColor: '#f5f5f5',
-          padding: '0.5rem',
-          borderRadius: '4px',
-          maxWidth: '600px',
-          overflow: 'auto'
-        }}>
-          {error.message}
-        </p>
-        <Link 
-          href="/admin/login" 
-          style={{ 
-            marginTop: '1rem', 
-            color: '#2d6a4f', 
-            textDecoration: 'underline' 
-          }}
-        >
-          ↻ Réessayer la connexion
-        </Link>
-      </div>
-    )
-  }
+    </div>
+  )
 }
