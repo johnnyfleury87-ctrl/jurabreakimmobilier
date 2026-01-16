@@ -13,9 +13,33 @@ import { NextResponse } from 'next/server'
  */
 export async function checkApiAdminAuth() {
   const devBypassEnabled = process.env.NEXT_PUBLIC_DEV_ADMIN_BYPASS === 'true'
+  const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1'
+  
+  // Log détaillé en production pour debugging
+  if (isProduction) {
+    console.log('🔍 [PROD] Vérification auth API - Environnement:', {
+      NODE_ENV: process.env.NODE_ENV,
+      VERCEL: process.env.VERCEL,
+      hasSupabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+      hasSupabaseKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    })
+  }
+  
   const supabase = await createClient()
   
   if (devBypassEnabled) {
+    if (isProduction) {
+      // CRITIQUE: En production, JAMAIS de bypass
+      console.error('🚨 ALERTE SÉCURITÉ: DEV_ADMIN_BYPASS actif en PRODUCTION!')
+      return {
+        supabase,
+        user: null,
+        error: NextResponse.json(
+          { error: 'Configuration invalide' },
+          { status: 500 }
+        )
+      }
+    }
     console.warn('⚠️ DEV API BYPASS ACTIF - Ne jamais utiliser en production !')
     return { supabase, user: null, error: null, devBypass: true }
   }
@@ -29,13 +53,18 @@ export async function checkApiAdminAuth() {
     console.error('❌ AUTH_ERROR:', {
       message: authError.message,
       status: authError.status,
-      name: authError.name
+      name: authError.name,
+      isProduction
     })
     return {
       supabase,
       user: null,
       error: NextResponse.json(
-        { error: 'Erreur d\'authentification', details: authError.message },
+        { 
+          error: 'AUTH_ERROR',
+          message: 'Erreur d\'authentification', 
+          details: isProduction ? 'Session invalide' : authError.message
+        },
         { status: 401 }
       )
     }
@@ -47,13 +76,22 @@ export async function checkApiAdminAuth() {
       supabase,
       user: null,
       error: NextResponse.json(
-        { error: 'Session manquante', details: 'Veuillez vous connecter via /admin/login' },
+        { 
+          error: 'NO_USER',
+          message: 'Auth session missing', 
+          details: 'Veuillez vous connecter via /admin/login' 
+        },
         { status: 401 }
       )
     }
   }
   
-  console.log('✅ User détecté:', { id: user.id, email: user.email })
+  console.log('✅ User détecté:', { 
+    id: user.id, 
+    email: user.email,
+    aud: user.aud,
+    role: user.role 
+  })
   
   // Vérifier le rôle dans la table profiles
   const { data: profile, error: profileError } = await supabase
