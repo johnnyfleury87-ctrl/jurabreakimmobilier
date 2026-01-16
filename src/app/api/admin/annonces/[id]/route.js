@@ -1,0 +1,188 @@
+import { createClient } from '@/lib/supabase/server'
+import { NextResponse } from 'next/server'
+import { isAdminEmail } from '@/lib/auth/config'
+
+// GET: Récupérer une annonce spécifique
+export async function GET(request, { params }) {
+  try {
+    const supabase = await createClient()
+    const { id } = await params
+    
+    // Vérifier auth
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user || !isAdminEmail(user.email)) {
+      return NextResponse.json(
+        { error: 'Non autorisé' },
+        { status: 401 }
+      )
+    }
+    
+    const { data: annonce, error } = await supabase
+      .from('annonces')
+      .select(`
+        *,
+        annonce_photos(*)
+      `)
+      .eq('id', id)
+      .single()
+    
+    if (error) throw error
+    
+    if (!annonce) {
+      return NextResponse.json(
+        { error: 'Annonce non trouvée' },
+        { status: 404 }
+      )
+    }
+    
+    return NextResponse.json({ annonce })
+  } catch (error) {
+    console.error('Erreur GET /api/admin/annonces/[id]:', error)
+    return NextResponse.json(
+      { error: error.message },
+      { status: 500 }
+    )
+  }
+}
+
+// PUT: Mettre à jour une annonce
+export async function PUT(request, { params }) {
+  try {
+    const supabase = await createClient()
+    const { id } = await params
+    
+    // Vérifier auth
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user || !isAdminEmail(user.email)) {
+      return NextResponse.json(
+        { error: 'Non autorisé' },
+        { status: 401 }
+      )
+    }
+    
+    const body = await request.json()
+    
+    // Préparer les données de mise à jour
+    const updateData = {
+      titre: body.titre,
+      slug: body.slug,
+      type_bien: body.type_bien,
+      description: body.description,
+      points_forts: body.points_forts || [],
+      
+      ville: body.ville,
+      code_postal: body.code_postal,
+      secteur: body.secteur,
+      adresse: body.adresse,
+      latitude: body.latitude,
+      longitude: body.longitude,
+      
+      prix: body.prix,
+      devise: body.devise || 'EUR',
+      charges: body.charges,
+      taxe_fonciere: body.taxe_fonciere,
+      type_transaction: body.type_transaction || 'VENTE',
+      loyer_hc: body.loyer_hc,
+      
+      surface_m2: body.surface_m2,
+      terrain_m2: body.terrain_m2,
+      nb_pieces: body.nb_pieces,
+      nb_chambres: body.nb_chambres,
+      nb_salles_bain: body.nb_salles_bain,
+      nb_salles_eau: body.nb_salles_eau,
+      etage: body.etage,
+      nb_etages_immeuble: body.nb_etages_immeuble,
+      annee_construction: body.annee_construction,
+      
+      chauffage: body.chauffage,
+      type_chauffage: body.type_chauffage,
+      climatisation: body.climatisation || false,
+      ascenseur: body.ascenseur || false,
+      balcon: body.balcon || false,
+      terrasse: body.terrasse || false,
+      jardin: body.jardin || false,
+      garage: body.garage || false,
+      parking: body.parking || false,
+      cave: body.cave || false,
+      piscine: body.piscine || false,
+      
+      dpe: body.dpe,
+      ges: body.ges,
+      
+      video_url: body.video_url,
+      visite_virtuelle_url: body.visite_virtuelle_url,
+      
+      statut: body.statut,
+      visible: body.visible,
+      published_at: body.visible && !body.published_at ? new Date().toISOString() : body.published_at,
+      
+      honoraires_transaction: body.honoraires_transaction,
+      honoraires_location: body.honoraires_location,
+      honoraires_etat_lieux: body.honoraires_etat_lieux,
+      
+      ordre_affichage: body.ordre_affichage || 0
+    }
+    
+    // Mettre à jour
+    const { data: annonce, error } = await supabase
+      .from('annonces')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single()
+    
+    if (error) throw error
+    
+    return NextResponse.json({ 
+      annonce,
+      message: 'Annonce mise à jour avec succès' 
+    })
+    
+  } catch (error) {
+    console.error('Erreur PUT /api/admin/annonces/[id]:', error)
+    return NextResponse.json(
+      { error: error.message },
+      { status: 500 }
+    )
+  }
+}
+
+// DELETE: Supprimer une annonce (soft delete)
+export async function DELETE(request, { params }) {
+  try {
+    const supabase = await createClient()
+    const { id } = await params
+    
+    // Vérifier auth
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user || !isAdminEmail(user.email)) {
+      return NextResponse.json(
+        { error: 'Non autorisé' },
+        { status: 401 }
+      )
+    }
+    
+    // Soft delete
+    const { error } = await supabase
+      .from('annonces')
+      .update({
+        is_deleted: true,
+        deleted_at: new Date().toISOString(),
+        visible: false
+      })
+      .eq('id', id)
+    
+    if (error) throw error
+    
+    return NextResponse.json({ 
+      message: 'Annonce supprimée avec succès' 
+    })
+    
+  } catch (error) {
+    console.error('Erreur DELETE /api/admin/annonces/[id]:', error)
+    return NextResponse.json(
+      { error: error.message },
+      { status: 500 }
+    )
+  }
+}
