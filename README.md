@@ -24,16 +24,22 @@ Site web pour l'agence immobilière JuraBreak avec interface publique, panneau d
   - **Formule 1** : Payante (49€) / PDF détaillé
   - **Formule 2** : Payante (149€) / Juridiquement viable / Visite sur place
 
-### Interface Admin
-- Dashboard avec statistiques
-- Gestion des annonces (CRUD)
-  - Max 8 photos par annonce
-  - Statuts : EN_VENTE, SOUS_OFFRE, COMPROMIS, VENDU, RETIRE
-  - Gestion des commissions
-- Gestion des leads (demandes de contact/visite)
-- Gestion des événements
-- Gestion des estimations
-- Paramètres du site (contenu dynamique)
+### Interface Admin ✨ **PROPRE - 100% FONCTIONNELLE**
+- Dashboard simplifié (0 erreur console)
+- **Gestion des annonces (CRUD complet):**
+  - ✅ Création/Modification/Suppression
+  - ✅ Upload multi-photos mobile (8 photos max recommandées)
+  - ✅ Statuts : A_VENDRE, SOUS_COMPROMIS, VENDU, EN_LOCATION, LOUE, RETIRE
+  - ✅ Calcul automatique des honoraires (vente & location)
+  - ✅ Toggle visible/masqué
+  - ✅ Soft delete
+  - ✅ Mise à jour immédiate côté public
+- **Documentation complète:**
+  - 👉 [INDEX_DOCUMENTATION_ADMIN.md](INDEX_DOCUMENTATION_ADMIN.md) - Navigation
+  - 👉 [GUIDE_ADMIN_LOLITA.md](GUIDE_ADMIN_LOLITA.md) - Guide utilisateur
+  - 👉 [QUICKSTART_ADMIN_PROPRE.md](QUICKSTART_ADMIN_PROPRE.md) - Démarrage 3 min
+  - 👉 [CHECKLIST_ADMIN_PROPRE.md](CHECKLIST_ADMIN_PROPRE.md) - Tests validation
+  - 👉 [TROUBLESHOOTING_ADMIN.md](TROUBLESHOOTING_ADMIN.md) - Résolution problèmes
 
 ## Installation
 
