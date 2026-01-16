@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui'
-import HeroVideo from '@/components/HeroVideo'
+import HeroSection from '@/components/HeroSection'
 import styles from './page.module.css'
 import { createClient } from '@/lib/supabase/server'
 
@@ -38,30 +38,16 @@ export default async function HomePage() {
   
   return (
     <div className={styles.home}>
-      {/* HERO SECTION - Fond vert avec motif géométrique */}
-      <section className={styles.hero}>
-        {/* Vidéo d'arrière-plan */}
-        <HeroVideo />
-        
-        {/* Overlay vert */}
-        <div className={styles.heroOverlay}></div>
-        
-        <div className={styles.heroPattern}></div>
-        <div className={styles.heroContent}>
-          <div className={styles.heroLeft}>
-            <h1 className={styles.heroTitle}>
-              {heroTitle}
-            </h1>
-            <p className={styles.heroSubtitle}>
-              {heroSubtitle}
-            </p>
-            <Button href="/annonces" size="lg" className={styles.ctaButton}>
-              Voir les annonces
-            </Button>
-          </div>
-          <div className={styles.heroRight}></div>
-        </div>
-      </section>
+      {/* HERO SECTION - Composant réutilisable */}
+      <HeroSection
+        title={heroTitle}
+        subtitle={heroSubtitle}
+        buttons={[
+          { href: '/annonces', label: 'Voir les annonces', variant: 'primary', size: 'lg' }
+        ]}
+        showVideo={true}
+        minHeight="100vh"
+      />
 
       {/* SECTION PRÉSENTATION PERSONNELLE */}
       <section className={styles.presentation}>

@@ -1,0 +1,192 @@
+/* ============================================
+   HERO SECTION - Composant réutilisable
+   Fond vert avec motif géométrique
+   ============================================ */
+
+.hero {
+  position: relative;
+  background: var(--color-secondary);
+  overflow: hidden;
+}
+
+/* Overlay vert par-dessus la vidéo */
+.heroOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--color-secondary);
+  opacity: 0.65;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Motif géométrique hexagonal discret */
+.heroPattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.08;
+  background-image: 
+    repeating-linear-gradient(0deg, transparent, transparent 50px, rgba(255,255,255,0.1) 50px, rgba(255,255,255,0.1) 51px),
+    repeating-linear-gradient(60deg, transparent, transparent 50px, rgba(255,255,255,0.1) 50px, rgba(255,255,255,0.1) 51px),
+    repeating-linear-gradient(120deg, transparent, transparent 50px, rgba(255,255,255,0.1) 50px, rgba(255,255,255,0.1) 51px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.heroContent {
+  position: relative;
+  max-width: var(--container-2xl);
+  margin: 0 auto;
+  padding: var(--space-16) var(--container-padding-lg);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-16);
+  align-items: center;
+  z-index: 2;
+}
+
+.heroLeft {
+  z-index: 1;
+  max-width: 600px;
+  animation: fadeInUp var(--transition-slow) var(--transition-timing);
+}
+
+.heroRight {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  animation: fadeInUp var(--transition-slow) var(--transition-timing);
+  animation-delay: 0.2s;
+}
+
+.heroTitle {
+  font-size: var(--text-6xl);
+  font-weight: var(--font-bold);
+  color: #ffffff;
+  margin: 0 0 var(--space-6) 0;
+  line-height: var(--leading-tight);
+  letter-spacing: -0.02em;
+}
+
+.heroSubtitle {
+  font-size: var(--text-xl);
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0 0 var(--space-10) 0;
+  line-height: var(--leading-relaxed);
+  max-width: 500px;
+}
+
+.heroButtons {
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+/* Style bouton CTA principal (blanc sur vert) */
+.ctaButton {
+  background: #ffffff !important;
+  color: var(--color-secondary) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+}
+
+.ctaButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Image dans le hero */
+.heroImageWrapper {
+  position: relative;
+  max-width: 400px;
+  width: 100%;
+}
+
+.heroImage {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 1024px) {
+  .heroContent {
+    grid-template-columns: 1fr;
+    gap: var(--space-12);
+  }
+
+  .heroRight {
+    justify-content: center;
+  }
+
+  .heroImageWrapper {
+    max-width: 350px;
+  }
+
+  .heroTitle {
+    font-size: var(--text-5xl);
+  }
+}
+
+@media (max-width: 768px) {
+  .heroContent {
+    padding: var(--space-12) var(--container-padding-sm);
+  }
+
+  .heroTitle {
+    font-size: var(--text-4xl);
+  }
+
+  .heroSubtitle {
+    font-size: var(--text-lg);
+  }
+
+  .heroButtons {
+    flex-direction: column;
+  }
+
+  .heroButtons a,
+  .heroButtons button {
+    width: 100%;
+  }
+
+  .heroRight {
+    display: none;
+  }
+}
+
+/* ============================================
+   ACCESSIBILITÉ
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .heroLeft,
+  .heroRight {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}

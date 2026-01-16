@@ -1,79 +1,11 @@
 /* ============================================
-   HONORAIRES PAGE - Design Léger & Premium
+   HONORAIRES PAGE
+   Aligné sur le design system global
    ============================================ */
 
 .honorairesPage {
   min-height: 100vh;
   background: var(--color-background);
-}
-
-/* ============================================
-   HERO SECTION - Fond léger
-   ============================================ */
-
-.hero {
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-  padding: var(--space-20) 0 var(--space-16);
-  border-bottom: 1px solid var(--color-border-light);
-}
-
-.heroContent {
-  max-width: var(--container-xl);
-  margin: 0 auto;
-  padding: 0 var(--container-padding-lg);
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-16);
-  align-items: center;
-}
-
-.heroLeft {
-  opacity: 0;
-  animation: fadeInUp 0.6s ease-out 0.1s forwards;
-}
-
-.heroTitle {
-  font-size: var(--text-5xl);
-  font-weight: var(--font-bold);
-  color: var(--color-primary);
-  margin: 0 0 var(--space-4) 0;
-  line-height: var(--leading-tight);
-  letter-spacing: -0.02em;
-}
-
-.heroSubtitle {
-  font-size: var(--text-lg);
-  color: var(--color-text-secondary);
-  margin: 0 0 var(--space-8) 0;
-  line-height: var(--leading-relaxed);
-  max-width: 500px;
-}
-
-.heroCta {
-  display: flex;
-  gap: var(--space-4);
-  flex-wrap: wrap;
-}
-
-.heroRight {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  opacity: 0;
-  animation: fadeInUp 0.6s ease-out 0.3s forwards;
-}
-
-.heroImageWrapper {
-  position: relative;
-  max-width: 400px;
-  width: 100%;
-}
-
-.heroImage {
-  width: 100%;
-  height: auto;
-  border-radius: var(--radius-lg);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
 }
 
 /* ============================================
@@ -95,15 +27,15 @@
 
 .section {
   opacity: 0;
-  animation: fadeInUp 0.6s ease-out forwards;
+  animation: fadeInUp 0.8s ease-out forwards;
 }
 
 .section:nth-child(1) {
-  animation-delay: 0.2s;
+  animation-delay: 0.1s;
 }
 
 .section:nth-child(2) {
-  animation-delay: 0.4s;
+  animation-delay: 0.3s;
 }
 
 .sectionTitle {
@@ -252,7 +184,7 @@
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(30px);
   }
   to {
     opacity: 1;
@@ -265,17 +197,8 @@
    ============================================ */
 
 @media (max-width: 1024px) {
-  .heroContent {
-    grid-template-columns: 1fr;
-    gap: var(--space-12);
-  }
-
-  .heroRight {
-    justify-content: center;
-  }
-
-  .heroImageWrapper {
-    max-width: 350px;
+  .mainContent {
+    padding: var(--space-16) var(--container-padding-md);
   }
 }
 
@@ -284,31 +207,6 @@
    ============================================ */
 
 @media (max-width: 768px) {
-  .hero {
-    padding: var(--space-16) 0 var(--space-12);
-  }
-
-  .heroTitle {
-    font-size: var(--text-4xl);
-  }
-
-  .heroSubtitle {
-    font-size: var(--text-base);
-  }
-
-  .heroCta {
-    flex-direction: column;
-  }
-
-  .heroCta a,
-  .heroCta button {
-    width: 100%;
-  }
-
-  .heroRight {
-    display: none;
-  }
-
   .mainContent {
     padding: var(--space-12) var(--container-padding-sm);
     gap: var(--space-16);
@@ -372,8 +270,6 @@
    ============================================ */
 
 @media (prefers-reduced-motion: reduce) {
-  .heroLeft,
-  .heroRight,
   .section {
     animation: none;
     opacity: 1;
@@ -390,24 +286,6 @@
    ============================================ */
 
 @media print {
-  .hero {
-    background: none;
-    padding: var(--space-8) 0;
-  }
-
-  .heroTitle {
-    color: var(--color-text-primary);
-  }
-
-  .heroSubtitle,
-  .heroCta {
-    display: none;
-  }
-
-  .heroImage {
-    display: none;
-  }
-
   .mainContent {
     padding: var(--space-8) 0;
   }

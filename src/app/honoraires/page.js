@@ -1,5 +1,4 @@
-import Image from 'next/image'
-import { Button } from '@/components/ui'
+import HeroSection from '@/components/HeroSection'
 import styles from './page.module.css'
 
 export const metadata = {
@@ -10,37 +9,18 @@ export const metadata = {
 export default function HonorairesPage() {
   return (
     <div className={styles.honorairesPage}>
-      {/* HERO SECTION - Fond léger */}
-      <section className={styles.hero}>
-        <div className={styles.heroContent}>
-          <div className={styles.heroLeft}>
-            <h1 className={styles.heroTitle}>Honoraires</h1>
-            <p className={styles.heroSubtitle}>
-              Transparence totale, sans surprise, sans frais cachés
-            </p>
-            <div className={styles.heroCta}>
-              <Button href="/contact" variant="primary" size="md">
-                Nous contacter
-              </Button>
-              <Button href="/estimation" variant="secondary" size="md">
-                Demander une estimation
-              </Button>
-            </div>
-          </div>
-          <div className={styles.heroRight}>
-            <div className={styles.heroImageWrapper}>
-              <Image
-                src="/images/team/honorraire.png"
-                alt="Honoraires JuraBreak Immobilier"
-                width={400}
-                height={400}
-                className={styles.heroImage}
-                priority
-              />
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* HERO SECTION - Utilisation du composant partagé */}
+      <HeroSection
+        title="Honoraires"
+        subtitle="Transparence totale, sans surprise, sans frais cachés"
+        buttons={[
+          { href: '/contact', label: 'Nous contacter', variant: 'primary' },
+          { href: '/estimation', label: 'Demander une estimation', variant: 'secondary' }
+        ]}
+        imageSrc="/images/team/honorraire.png"
+        imageAlt="Honoraires JuraBreak Immobilier"
+        minHeight="60vh"
+      />
 
       {/* CONTENU PRINCIPAL */}
       <div className={styles.mainContent}>
