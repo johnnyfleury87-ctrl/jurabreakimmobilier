@@ -16,6 +16,9 @@ export default function Header() {
           <Link href="/evenements">Événements</Link>
           <Link href="/estimation">Estimation</Link>
           <Link href="/contact">Contact</Link>
+          <Link href="/admin" className={styles.adminLink} title="Espace administration">
+            Admin
+          </Link>
         </nav>
       </div>
     </header>

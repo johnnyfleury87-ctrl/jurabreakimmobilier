@@ -1,140 +1,249 @@
 .admin {
   display: grid;
-  grid-template-columns: 250px 1fr;
+  grid-template-columns: 280px 1fr;
   min-height: 100vh;
+  background: #f9fafb;
 }
 
-.nav {
-  background: #2c5282;
+/* ============================================
+   SIDEBAR
+   ============================================ */
+
+.sidebar {
+  background: #1a1a1a;
   color: #fff;
-  padding: 2rem 0;
+  display: flex;
+  flex-direction: column;
   position: sticky;
   top: 0;
   height: 100vh;
+}
+
+.sidebarHeader {
+  padding: 2rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebarHeader h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.publicLink {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.875rem;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.publicLink:hover {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.menu {
+  list-style: none;
+  padding: 1rem 0;
+  margin: 0;
+  flex: 1;
   overflow-y: auto;
 }
 
-.navHeader {
-  padding: 0 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.navHeader h2 {
-  margin-bottom: 0.5rem;
-  font-size: 1.5rem;
-}
-
-.navHeader a {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.875rem;
-  text-decoration: underline;
-}
-
-.nav ul {
-  list-style: none;
-  padding: 0;
-}
-
-.nav li {
+.menu li {
   margin: 0;
 }
 
-.nav a {
+.menu a {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1.5rem;
+  color: rgba(255, 255, 255, 0.7);
+  transition: all 0.2s;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.menu a:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 1);
+}
+
+.menu a.active {
+  background: rgba(45, 106, 79, 0.2);
+  color: #fff;
+  border-left: 3px solid #2d6a4f;
+}
+
+.sidebarFooter {
+  padding: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 1rem 0;
+  word-break: break-word;
+}
+
+.userIcon {
+  font-size: 1.25rem;
+}
+
+.logoutLink {
   display: block;
-  padding: 0.75rem 1.5rem;
-  color: rgba(255, 255, 255, 0.9);
-  transition: background 0.2s;
+  padding: 0.75rem;
+  text-align: center;
+  background: rgba(220, 38, 38, 0.1);
+  color: #fca5a5;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: all 0.2s;
 }
 
-.nav a:hover {
-  background: rgba(255, 255, 255, 0.1);
+.logoutLink:hover {
+  background: rgba(220, 38, 38, 0.2);
+  color: #fee2e2;
 }
 
-.main {
-  padding: 2rem;
-  max-width: 1400px;
+/* ============================================
+   CONTENT
+   ============================================ */
+
+.content {
+  padding: 3rem;
+  overflow-y: auto;
 }
 
-.main h1 {
-  font-size: 2rem;
-  color: #2c5282;
-  margin-bottom: 2rem;
-}
-
-.stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
+.header {
   margin-bottom: 3rem;
 }
 
-.statCard {
-  background: #fff;
-  padding: 1.5rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.statCard h3 {
-  font-size: 0.875rem;
-  color: #666;
-  margin-bottom: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.statNumber {
+.header h1 {
   font-size: 2.5rem;
-  font-weight: bold;
-  color: #2c5282;
-  margin-bottom: 1rem;
+  color: #1a1a1a;
+  margin: 0 0 0.5rem 0;
+  font-weight: 700;
 }
 
-.statCard a {
-  color: #2c5282;
-  font-weight: 600;
-  text-decoration: underline;
+.subtitle {
+  color: #666;
+  font-size: 1.125rem;
+  margin: 0;
 }
 
-.quickActions {
+/* ============================================
+   CARDS
+   ============================================ */
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.card {
   background: #fff;
   padding: 2rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.quickActions h2 {
-  font-size: 1.5rem;
-  color: #2c5282;
-  margin-bottom: 1.5rem;
-}
-
-.actions {
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s;
   display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
+  flex-direction: column;
 }
 
-.actionButton {
-  background: #2c5282;
-  color: #fff;
-  padding: 1rem 1.5rem;
-  border-radius: 0.5rem;
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.cardIcon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.cardContent h3 {
+  font-size: 0.875rem;
+  color: #666;
+  margin: 0 0 1rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   font-weight: 600;
-  transition: background 0.2s;
 }
 
-.actionButton:hover {
-  background: #1a365d;
+.cardNumber {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 0.5rem 0;
+  line-height: 1;
 }
 
-@media (max-width: 968px) {
+.cardLabel {
+  font-size: 0.875rem;
+  color: #666;
+  margin: 0 0 1.5rem 0;
+}
+
+.cardLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #2d6a4f;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 0.95rem;
+  margin-top: auto;
+  transition: gap 0.2s;
+}
+
+.cardLink:hover {
+  gap: 0.75rem;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 1024px) {
   .admin {
     grid-template-columns: 1fr;
   }
   
-  .nav {
+  .sidebar {
     position: static;
     height: auto;
+  }
+  
+  .content {
+    padding: 2rem 1.5rem;
+  }
+  
+  .header h1 {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .content {
+    padding: 1.5rem 1rem;
+  }
+  
+  .header h1 {
+    font-size: 1.75rem;
+  }
+  
+  .cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .cardNumber {
+    font-size: 2.5rem;
   }
 }

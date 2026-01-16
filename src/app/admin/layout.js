@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { isAdminEmail } from '@/lib/auth/config'
+import Link from 'next/link'
 
 export default async function AdminLayout({ children }) {
   const supabase = await createClient()
@@ -11,18 +13,32 @@ export default async function AdminLayout({ children }) {
     redirect('/admin/login')
   }
   
-  // Vérifier si l'utilisateur est admin
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-  
-  if (!profile || profile.role !== 'admin') {
+  // Vérifier si l'email est autorisé
+  if (!isAdminEmail(user.email)) {
     return (
-      <div style={{ padding: '2rem', textAlign: 'center' }}>
-        <h1>Accès refusé</h1>
-        <p>Vous n&apos;avez pas les permissions nécessaires pour accéder à cette page.</p>
+      <div style={{ 
+        minHeight: '100vh', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        flexDirection: 'column',
+        gap: '1rem',
+        padding: '2rem'
+      }}>
+        <h1 style={{ fontSize: '2rem', color: '#dc2626' }}>Accès non autorisé</h1>
+        <p style={{ color: '#666', textAlign: 'center' }}>
+          Votre compte ({user.email}) n&apos;a pas les permissions nécessaires pour accéder à l&apos;administration.
+        </p>
+        <Link 
+          href="/" 
+          style={{ 
+            marginTop: '1rem', 
+            color: '#2d6a4f', 
+            textDecoration: 'underline' 
+          }}
+        >
+          ← Retour au site
+        </Link>
       </div>
     )
   }

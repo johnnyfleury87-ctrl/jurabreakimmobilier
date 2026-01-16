@@ -2,33 +2,36 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import styles from './page.module.css'
 
 export default function LoginPage() {
   const router = useRouter()
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState(false)
   
-  const handleSubmit = async (e) => {
+  const handleMagicLink = async (e) => {
     e.preventDefault()
     setLoading(true)
     setError('')
+    setSuccess(false)
     
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+      const supabase = createClient()
+      
+      const { error } = await supabase.auth.signInWithOtp({
+        email: email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/admin`,
+        },
       })
       
-      if (response.ok) {
-        router.push('/admin')
-        router.refresh()
+      if (error) {
+        setError(error.message)
       } else {
-        const data = await response.json()
-        setError(data.error || 'Erreur de connexion')
+        setSuccess(true)
       }
     } catch (err) {
       setError('Une erreur est survenue')
@@ -41,39 +44,58 @@ export default function LoginPage() {
     <div className={styles.loginPage}>
       <div className={styles.loginBox}>
         <h1>Administration</h1>
-        <p>Connectez-vous pour accéder au panneau d&apos;administration</p>
+        <p className={styles.subtitle}>Connexion sécurisée par lien magique</p>
         
         {error && (
-          <div className={styles.error}>{error}</div>
+          <div className={styles.error}>
+            <strong>Erreur :</strong> {error}
+          </div>
         )}
         
-        <form onSubmit={handleSubmit}>
-          <div className={styles.field}>
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+        {success ? (
+          <div className={styles.success}>
+            <h3>✓ Email envoyé !</h3>
+            <p>
+              Vérifiez votre boîte de réception <strong>{email}</strong>
+            </p>
+            <p className={styles.instructions}>
+              Cliquez sur le lien dans l&apos;email pour vous connecter.
+              Le lien est valide pendant 1 heure.
+            </p>
+            <button 
+              onClick={() => {
+                setSuccess(false)
+                setEmail('')
+              }}
+              className={styles.buttonSecondary}
+            >
+              Renvoyer un lien
+            </button>
           </div>
-          
-          <div className={styles.field}>
-            <label htmlFor="password">Mot de passe</label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          
-          <button type="submit" disabled={loading} className={styles.button}>
-            {loading ? 'Connexion...' : 'Se connecter'}
-          </button>
-        </form>
+        ) : (
+          <form onSubmit={handleMagicLink}>
+            <div className={styles.field}>
+              <label htmlFor="email">Adresse email professionnelle</label>
+              <input
+                type="email"
+                id="email"
+                placeholder="votre.email@jurabreak.fr"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={loading}
+              />
+            </div>
+            
+            <button type="submit" disabled={loading} className={styles.button}>
+              {loading ? 'Envoi en cours...' : 'Recevoir le lien de connexion'}
+            </button>
+            
+            <p className={styles.info}>
+              Un email contenant un lien de connexion sécurisé sera envoyé à votre adresse.
+            </p>
+          </form>
+        )}
         
         <a href="/" className={styles.backLink}>
           ← Retour au site
