@@ -9,7 +9,7 @@
 .hero {
   position: relative;
   min-height: 100vh;
-  background: #2d6a4f; /* Vert professionnel */
+  background: var(--color-secondary);
   overflow: hidden;
 }
 
@@ -30,19 +30,20 @@
 
 .heroContent {
   position: relative;
-  max-width: 1400px;
+  max-width: var(--container-2xl);
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 var(--container-padding-lg);
   min-height: 100vh;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 4rem;
+  gap: var(--space-16);
   align-items: center;
 }
 
 .heroLeft {
   z-index: 1;
   max-width: 600px;
+  animation: fadeInUp var(--transition-slow) var(--transition-timing);
 }
 
 .heroRight {
@@ -51,38 +52,31 @@
 }
 
 .heroTitle {
-  font-size: 3.5rem;
-  font-weight: 700;
+  font-size: var(--text-6xl);
+  font-weight: var(--font-bold);
   color: #ffffff;
-  margin: 0 0 1.5rem 0;
-  line-height: 1.2;
+  margin: 0 0 var(--space-6) 0;
+  line-height: var(--leading-tight);
   letter-spacing: -0.02em;
 }
 
 .heroSubtitle {
-  font-size: 1.25rem;
+  font-size: var(--text-xl);
   color: rgba(255, 255, 255, 0.9);
-  margin: 0 0 2.5rem 0;
-  line-height: 1.6;
+  margin: 0 0 var(--space-10) 0;
+  line-height: var(--leading-relaxed);
   max-width: 500px;
 }
 
 .ctaButton {
-  display: inline-block;
-  background: #ffffff;
-  color: #2d6a4f;
-  padding: 1rem 2.5rem;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 1rem;
-  text-decoration: none;
-  transition: all 0.3s ease;
+  background: #ffffff !important;
+  color: var(--color-secondary) !important;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
 }
 
 .ctaButton:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2) !important;
 }
 
 /* ============================================
@@ -90,26 +84,26 @@
    ============================================ */
 
 .presentation {
-  background: #ffffff;
-  padding: 8rem 0;
+  background: var(--color-background-alt);
+  padding: var(--space-24) 0;
 }
 
 .presentationContent {
-  max-width: 1400px;
+  max-width: var(--container-2xl);
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 var(--container-padding-lg);
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 4rem;
+  gap: var(--space-16);
   align-items: center;
 }
 
 .presentationLeft {
-  /* Colonne gauche avec photo de Lolita */
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 400px;
+  animation: slideInLeft var(--transition-slow) var(--transition-timing);
 }
 
 .imageWrapper {
@@ -123,54 +117,42 @@
   height: 100%;
   object-fit: cover;
   border-radius: 50%;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-xl);
+  transition: var(--transition-transform);
+}
+
+.imageWrapper:hover .teamImage {
+  transform: scale(1.05);
 }
 
 .presentationRight {
   max-width: 600px;
   justify-self: end;
+  animation: slideInRight var(--transition-slow) var(--transition-timing);
 }
 
 .presentationIntro {
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: #2d6a4f;
-  margin: 0 0 1rem 0;
-  font-weight: 600;
+  color: var(--color-secondary);
+  margin: 0 0 var(--space-4) 0;
+  font-weight: var(--font-semibold);
 }
 
 .presentationTitle {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin: 0 0 1.5rem 0;
-  line-height: 1.3;
+  font-size: var(--text-4xl);
+  font-weight: var(--font-bold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-6) 0;
+  line-height: var(--leading-tight);
 }
 
 .presentationText {
-  font-size: 1.125rem;
-  color: #4a4a4a;
-  margin: 0 0 2rem 0;
-  line-height: 1.7;
-}
-
-.secondaryButton {
-  display: inline-block;
-  background: transparent;
-  color: #2d6a4f;
-  padding: 0.875rem 2rem;
-  border: 2px solid #2d6a4f;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 1rem;
-  text-decoration: none;
-  transition: all 0.3s ease;
-}
-
-.secondaryButton:hover {
-  background: #2d6a4f;
-  color: #ffffff;
+  font-size: var(--text-lg);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-8) 0;
+  line-height: var(--leading-relaxed);
 }
 
 /* ============================================
@@ -181,13 +163,13 @@
   .heroContent,
   .presentationContent {
     grid-template-columns: 1fr;
-    gap: 2rem;
-    padding: 0 1.5rem;
+    gap: var(--space-8);
+    padding: 0 var(--container-padding);
   }
 
   .hero {
     min-height: auto;
-    padding: 4rem 0;
+    padding: var(--space-16) 0;
   }
 
   .heroContent {
@@ -198,11 +180,51 @@
     display: none;
   }
   
+  .heroTitle {
+    font-size: var(--text-4xl);
+  }
+
+  .heroSubtitle {
+    font-size: var(--text-lg);
+  }
+
+  .presentationTitle {
+    font-size: var(--text-3xl);
+  }
+
+  .presentationText {
+    font-size: var(--text-base);
+  }
+
+  .presentationLeft {
+    animation: fadeInUp var(--transition-slow) var(--transition-timing);
+  }
+
+  .presentationRight {
+    animation: fadeInUp var(--transition-slow) var(--transition-timing);
+    animation-delay: 100ms;
+    justify-self: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heroLeft,
+  .presentationLeft,
+  .presentationRight {
+    animation: none;
+  }
+
+  .imageWrapper:hover .teamImage {
+    transform: none;
+  }
+}
+
+@media (max-width: 768px) {
   .presentationLeft {
     display: flex;
     justify-content: center;
     min-height: auto;
-    margin-bottom: 2rem;
+    margin-bottom: var(--space-8);
   }
   
   .imageWrapper {
@@ -215,15 +237,15 @@
   }
 
   .heroTitle {
-    font-size: 2.5rem;
+    font-size: var(--text-4xl);
   }
 
   .heroSubtitle {
-    font-size: 1.125rem;
+    font-size: var(--text-lg);
   }
 
   .presentation {
-    padding: 4rem 0;
+    padding: var(--space-16) 0;
   }
 
   .presentationRight {

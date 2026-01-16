@@ -1,92 +1,136 @@
-.honoraires {
-  padding: 4rem 0;
-  min-height: 60vh;
+/* ============================================
+   HONORAIRES PAGE - Design System
+   ============================================ */
+
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-6);
+  margin-bottom: var(--space-12);
 }
 
-.honoraires h1 {
-  font-size: 3rem;
-  color: #2c5282;
-  margin-bottom: 2rem;
-  text-align: center;
+.card {
+  animation: fadeInUp var(--transition-slow) var(--transition-timing);
 }
 
-.content {
-  max-width: 800px;
-  margin: 0 auto;
+.card:nth-child(1) {
+  animation-delay: 0ms;
 }
 
-.section {
-  margin-bottom: 3rem;
+.card:nth-child(2) {
+  animation-delay: 100ms;
 }
 
-.section h2 {
-  font-size: 2rem;
-  color: #2c5282;
-  margin-bottom: 1rem;
+.card:nth-child(3) {
+  animation-delay: 200ms;
 }
 
-.section h3 {
-  font-size: 1.5rem;
-  color: #2c5282;
-  margin-bottom: 1rem;
+.cardTitle {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  color: var(--color-primary);
+  margin-bottom: var(--space-4);
 }
 
-.section p {
-  font-size: 1.125rem;
-  line-height: 1.8;
-  margin-bottom: 1rem;
+.cardText {
+  font-size: var(--text-base);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-relaxed);
+  margin-bottom: var(--space-4);
 }
 
-.section ul {
+.cardText:last-child {
+  margin-bottom: 0;
+}
+
+/* Info box */
+.info {
+  background: var(--color-primary-lighter);
+  border-left: 4px solid var(--color-primary);
+  padding: var(--space-4);
+  margin-top: var(--space-6);
+  border-radius: var(--radius-sm);
+}
+
+.info p {
+  font-size: var(--text-sm);
+  color: var(--color-primary-dark);
+  margin: 0;
+}
+
+/* Services list */
+.servicesList {
   list-style: none;
-  padding-left: 0;
+  padding: 0;
+  margin: 0;
 }
 
-.section li {
-  padding: 0.5rem 0 0.5rem 2rem;
+.servicesList li {
+  padding: var(--space-3) 0 var(--space-3) var(--space-8);
   position: relative;
-  font-size: 1.125rem;
+  font-size: var(--text-base);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-relaxed);
 }
 
-.section li:before {
+.servicesList li:before {
   content: "✓";
   position: absolute;
   left: 0;
-  color: #2c5282;
-  font-weight: bold;
+  color: var(--color-primary);
+  font-weight: var(--font-bold);
+  font-size: var(--text-lg);
 }
 
-.info {
-  background: #f0f7ff;
-  border-left: 4px solid #2c5282;
-  padding: 1rem;
-  margin: 1rem 0;
-}
-
-.contact {
-  background: #f9fafb;
-  padding: 2rem;
-  border-radius: 0.5rem;
+/* CTA Card */
+.ctaCard {
   text-align: center;
+  background: linear-gradient(135deg, var(--color-primary-lighter) 0%, var(--color-background-card) 100%);
+  animation: fadeInUp var(--transition-slow) var(--transition-timing);
+  animation-delay: 300ms;
+  animation-fill-mode: both;
 }
 
-.button {
-  display: inline-block;
-  background: #2c5282;
-  color: #fff;
-  padding: 1rem 2rem;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  margin-top: 1rem;
-  transition: background 0.2s;
+.ctaTitle {
+  font-size: var(--text-3xl);
+  font-weight: var(--font-bold);
+  color: var(--color-primary);
+  margin-bottom: var(--space-4);
 }
 
-.button:hover {
-  background: #1a365d;
+.ctaText {
+  font-size: var(--text-lg);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-6);
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
+
+/* ========== RESPONSIVE ========== */
 
 @media (max-width: 768px) {
-  .honoraires h1 {
-    font-size: 2rem;
+  .cardsGrid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  .cardTitle {
+    font-size: var(--text-xl);
+  }
+
+  .ctaTitle {
+    font-size: var(--text-2xl);
+  }
+
+  .ctaText {
+    font-size: var(--text-base);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .ctaCard {
+    animation: none;
   }
 }

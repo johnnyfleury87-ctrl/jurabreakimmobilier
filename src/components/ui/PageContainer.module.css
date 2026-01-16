@@ -1,0 +1,122 @@
+/* ============================================
+   PAGE CONTAINER COMPONENT
+   ============================================ */
+
+.pageContainer {
+  width: 100%;
+  animation: fadeIn var(--transition-slow) var(--transition-timing);
+}
+
+.inner {
+  max-width: var(--container-xl);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--container-padding);
+  padding-right: var(--container-padding);
+}
+
+/* ========== MAX WIDTH ========== */
+
+.pageContainer.maxWidth-sm .inner {
+  max-width: var(--container-sm);
+}
+
+.pageContainer.maxWidth-md .inner {
+  max-width: var(--container-md);
+}
+
+.pageContainer.maxWidth-lg .inner {
+  max-width: var(--container-lg);
+}
+
+.pageContainer.maxWidth-xl .inner {
+  max-width: var(--container-xl);
+}
+
+.pageContainer.maxWidth-2xl .inner {
+  max-width: var(--container-2xl);
+}
+
+.pageContainer.maxWidth-full .inner {
+  max-width: 100%;
+}
+
+/* ========== SPACING (padding vertical) ========== */
+
+.pageContainer.spacing-none {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.pageContainer.spacing-sm {
+  padding-top: var(--space-8);
+  padding-bottom: var(--space-8);
+}
+
+.pageContainer.spacing-md {
+  padding-top: var(--space-12);
+  padding-bottom: var(--space-12);
+}
+
+.pageContainer.spacing-lg {
+  padding-top: var(--space-16);
+  padding-bottom: var(--space-16);
+}
+
+.pageContainer.spacing-xl {
+  padding-top: var(--space-24);
+  padding-bottom: var(--space-24);
+}
+
+/* ========== BACKGROUND ========== */
+
+.pageContainer.bg-white {
+  background: var(--color-background-alt);
+}
+
+.pageContainer.bg-gray {
+  background: var(--color-background);
+}
+
+.pageContainer.bg-transparent {
+  background: transparent;
+}
+
+/* ========== CENTERED ========== */
+
+.pageContainer.centered {
+  display: flex;
+  align-items: center;
+  min-height: 60vh;
+}
+
+/* ========== RESPONSIVE ========== */
+
+@media (min-width: 1024px) {
+  .inner {
+    padding-left: var(--container-padding-lg);
+    padding-right: var(--container-padding-lg);
+  }
+}
+
+@media (max-width: 768px) {
+  .pageContainer.spacing-sm {
+    padding-top: var(--space-6);
+    padding-bottom: var(--space-6);
+  }
+
+  .pageContainer.spacing-md {
+    padding-top: var(--space-8);
+    padding-bottom: var(--space-8);
+  }
+
+  .pageContainer.spacing-lg {
+    padding-top: var(--space-10);
+    padding-bottom: var(--space-10);
+  }
+
+  .pageContainer.spacing-xl {
+    padding-top: var(--space-16);
+    padding-bottom: var(--space-16);
+  }
+}

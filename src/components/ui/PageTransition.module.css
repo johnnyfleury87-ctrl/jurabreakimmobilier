@@ -1,0 +1,25 @@
+/* ============================================
+   PAGE TRANSITION COMPONENT
+   ============================================ */
+
+.pageTransition {
+  animation: pageEnter var(--transition-slow) var(--transition-timing);
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Désactiver les animations si l'utilisateur préfère */
+@media (prefers-reduced-motion: reduce) {
+  .pageTransition {
+    animation: none;
+  }
+}

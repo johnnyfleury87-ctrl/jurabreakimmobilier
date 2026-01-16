@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import { Button } from '@/components/ui'
 import styles from './page.module.css'
 import { createClient } from '@/lib/supabase/server'
 
@@ -47,9 +48,9 @@ export default async function HomePage() {
             <p className={styles.heroSubtitle}>
               {heroSubtitle}
             </p>
-            <Link href="/annonces" className={styles.ctaButton}>
+            <Button href="/annonces" size="lg" className={styles.ctaButton}>
               Voir les annonces
-            </Link>
+            </Button>
           </div>
           <div className={styles.heroRight}></div>
         </div>
@@ -78,9 +79,9 @@ export default async function HomePage() {
             <p className={styles.presentationText}>
               {aboutText}
             </p>
-            <Link href="/a-propos" className={styles.secondaryButton}>
+            <Button href="/a-propos" variant="secondary" size="lg">
               En savoir plus
-            </Link>
+            </Button>
           </div>
         </div>
       </section>

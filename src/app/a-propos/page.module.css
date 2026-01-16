@@ -1,50 +1,114 @@
-.apropos {
-  padding: 4rem 0;
-  min-height: 60vh;
-}
-
-.apropos h1 {
-  font-size: 3rem;
-  color: #2c5282;
-  margin-bottom: 3rem;
-  text-align: center;
-}
+/* ============================================
+   À PROPOS PAGE - Design System
+   ============================================ */
 
 .content {
   display: grid;
   grid-template-columns: 1fr 2fr;
-  gap: 3rem;
+  gap: var(--space-8);
   align-items: start;
 }
 
+/* Photo Card */
+.photoCard {
+  animation: slideInLeft var(--transition-slow) var(--transition-timing);
+  overflow: hidden;
+}
+
 .photoContainer {
-  text-align: center;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3/4;
+  overflow: hidden;
 }
 
 .photo {
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
-.bio h2 {
-  color: #2c5282;
-  margin-bottom: 1.5rem;
-  font-size: 2rem;
+/* Bio Card */
+.bioCard {
+  animation: slideInRight var(--transition-slow) var(--transition-timing);
+}
+
+.bioTitle {
+  color: var(--color-primary);
+  margin-bottom: var(--space-6);
+  font-size: var(--text-3xl);
+  font-weight: var(--font-bold);
 }
 
 .bioText {
-  line-height: 1.8;
-  font-size: 1.125rem;
+  line-height: var(--leading-relaxed);
+  font-size: var(--text-lg);
+  color: var(--color-text-secondary);
 }
 
+.bioText p {
+  margin-bottom: var(--space-4);
+}
+
+.bioText p:last-child {
+  margin-bottom: 0;
+}
+
+.bioText h3 {
+  color: var(--color-primary);
+  font-size: var(--text-xl);
+  margin-top: var(--space-8);
+  margin-bottom: var(--space-4);
+}
+
+.bioText ul {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-4) 0;
+}
+
+.bioText li {
+  padding: var(--space-2) 0 var(--space-2) var(--space-8);
+  position: relative;
+}
+
+.bioText li:before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  color: var(--color-primary);
+  font-weight: var(--font-bold);
+}
+
+/* Responsive */
 @media (max-width: 768px) {
-  .apropos h1 {
-    font-size: 2rem;
-  }
-  
   .content {
     grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+
+  .photoCard {
+    animation: fadeInUp var(--transition-slow) var(--transition-timing);
+  }
+
+  .bioCard {
+    animation: fadeInUp var(--transition-slow) var(--transition-timing);
+    animation-delay: 100ms;
+  }
+
+  .bioTitle {
+    font-size: var(--text-2xl);
+  }
+
+  .bioText {
+    font-size: var(--text-base);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .photoCard,
+  .bioCard {
+    animation: none;
   }
 }

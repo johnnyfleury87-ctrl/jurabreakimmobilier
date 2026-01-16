@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { PageContainer, SectionTitle } from '@/components/ui'
 import styles from './page.module.css'
 
 export default function EstimationPage() {
@@ -115,18 +116,21 @@ export default function EstimationPage() {
   }
 
   return (
-    <div className={styles.estimation}>
-      <div className="container">
-        <h1>Estimation de votre bien</h1>
-        <p className={styles.intro}>
-          Obtenez une estimation de votre bien immobilier en quelques clics.
-        </p>
-        
-        {!selectedFormule ? (
-          <div className={styles.formules}>
-            <h2 className={styles.formTitle}>Choisissez votre formule</h2>
-            <div className={styles.grid}>
-              {formules.map((formule) => (
+    <PageContainer spacing="lg" maxWidth="2xl" background="gray">
+      <SectionTitle 
+        level="h1" 
+        align="center"
+        subtitle="Obtenez une estimation de votre bien immobilier en quelques clics"
+        spacing="lg"
+      >
+        Estimation de votre bien
+      </SectionTitle>
+      
+      {!selectedFormule ? (
+        <div className={styles.formules}>
+          <h2 className={styles.formTitle}>Choisissez votre formule</h2>
+          <div className={styles.grid}>
+            {formules.map((formule) => (
                 <div key={formule.id} className={styles.formuleCard}>
                   <h3>{formule.nom}</h3>
                   <div className={styles.prix}>{formule.prix}</div>
@@ -362,7 +366,6 @@ export default function EstimationPage() {
             </form>
           </div>
         )}
-      </div>
-    </div>
-  )
+      </PageContainer>
+    )
 }

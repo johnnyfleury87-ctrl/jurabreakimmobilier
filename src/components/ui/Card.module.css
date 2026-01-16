@@ -1,0 +1,102 @@
+/* ============================================
+   CARD COMPONENT
+   ============================================ */
+
+.card {
+  background: var(--color-background-card);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  transition: var(--transition-all);
+  overflow: hidden;
+}
+
+/* ========== VARIANTS ========== */
+
+.card.hoverable:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.card.clickable {
+  cursor: pointer;
+}
+
+.card.clickable:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-card-hover);
+  border-color: var(--color-primary-light);
+}
+
+.card.clickable:active {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.card.noBorder {
+  border: none;
+}
+
+/* ========== PADDING ========== */
+
+.card.padding-none {
+  padding: 0;
+}
+
+.card.padding-sm {
+  padding: var(--space-4);
+}
+
+.card.padding-md {
+  padding: var(--space-6);
+}
+
+.card.padding-lg {
+  padding: var(--space-8);
+}
+
+/* ========== CARD SECTIONS ========== */
+
+.cardHeader {
+  padding: var(--space-6);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.cardContent {
+  padding: var(--space-6);
+}
+
+.cardFooter {
+  padding: var(--space-6);
+  border-top: 1px solid var(--color-border-light);
+  background: var(--color-background);
+}
+
+/* Enlever le padding sur le card si on utilise header/content/footer */
+.card:has(.cardHeader, .cardContent, .cardFooter) {
+  padding: 0;
+}
+
+/* ========== FOCUS STATE ========== */
+
+.card.clickable:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* ========== ANIMATIONS ========== */
+
+.card {
+  animation: fadeInUp var(--transition-slow) var(--transition-timing);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    animation: none;
+  }
+  
+  .card.hoverable:hover,
+  .card.clickable:hover {
+    transform: none;
+  }
+}

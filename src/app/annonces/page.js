@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import Image from 'next/image'
+import { PageContainer, SectionTitle, Card } from '@/components/ui'
 import styles from './page.module.css'
 
 export default async function AnnoncesPage() {
@@ -22,23 +23,32 @@ export default async function AnnoncesPage() {
   }
 
   return (
-    <div className={styles.annonces}>
-      <div className="container">
-        <h1>Nos Annonces</h1>
-        
-        {!annonces || annonces.length === 0 ? (
+    <PageContainer spacing="lg" maxWidth="2xl" background="gray">
+      <SectionTitle 
+        level="h1" 
+        align="center"
+        subtitle="Découvrez notre sélection de biens immobiliers dans le Jura"
+        spacing="lg"
+      >
+        Nos Annonces
+      </SectionTitle>
+      
+      {!annonces || annonces.length === 0 ? (
+        <Card padding="lg" className={styles.emptyCard}>
           <p className={styles.empty}>Aucune annonce disponible pour le moment.</p>
-        ) : (
-          <div className={styles.grid}>
-            {annonces.map((annonce) => {
-              const firstPhoto = annonce.annonce_photos?.sort((a, b) => a.position - b.position)[0]
-              
-              return (
-                <Link 
-                  key={annonce.id} 
-                  href={`/annonces/${annonce.slug}`}
-                  className={styles.card}
-                >
+        </Card>
+      ) : (
+        <div className={styles.grid}>
+          {annonces.map((annonce, index) => {
+            const firstPhoto = annonce.annonce_photos?.sort((a, b) => a.position - b.position)[0]
+            
+            return (
+              <Link 
+                key={annonce.id} 
+                href={`/annonces/${annonce.slug}`}
+                className={styles.cardLink}
+              >
+                <Card hoverable clickable padding="none" className={styles.annonceCard} style={{ animationDelay: `${index * 50}ms` }}>
                   {firstPhoto && (
                     <div className={styles.imageContainer}>
                       <Image 
@@ -55,7 +65,7 @@ export default async function AnnoncesPage() {
                   )}
                   
                   <div className={styles.cardContent}>
-                    <h2>{annonce.titre}</h2>
+                    <h2 className={styles.title}>{annonce.titre}</h2>
                     <p className={styles.location}>{annonce.ville} ({annonce.code_postal})</p>
                     <p className={styles.price}>
                       {new Intl.NumberFormat('fr-FR', {
@@ -71,12 +81,12 @@ export default async function AnnoncesPage() {
                       {annonce.nb_chambres && <span>{annonce.nb_chambres} chambres</span>}
                     </div>
                   </div>
-                </Link>
-              )
-            })}
-          </div>
-        )}
-      </div>
-    </div>
+                </Card>
+              </Link>
+            )
+          })}
+        </div>
+      )}
+    </PageContainer>
   )
 }

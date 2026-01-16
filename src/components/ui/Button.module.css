@@ -1,0 +1,131 @@
+/* ============================================
+   BUTTON COMPONENT
+   ============================================ */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font-family: var(--font-sans);
+  font-weight: var(--font-semibold);
+  text-decoration: none;
+  text-align: center;
+  border: none;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition: var(--transition-all);
+  border-radius: var(--radius-btn);
+  line-height: 1;
+}
+
+/* ========== VARIANTS ========== */
+
+/* Primary */
+.button.primary {
+  background: var(--color-primary);
+  color: white;
+  box-shadow: var(--shadow-button);
+}
+
+.button.primary:hover:not(.disabled) {
+  background: var(--color-primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-button-hover);
+}
+
+.button.primary:active:not(.disabled) {
+  transform: translateY(0);
+  box-shadow: var(--shadow-button);
+}
+
+/* Secondary */
+.button.secondary {
+  background: transparent;
+  color: var(--color-primary);
+  border: 2px solid var(--color-primary);
+  box-shadow: none;
+}
+
+.button.secondary:hover:not(.disabled) {
+  background: var(--color-primary);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-button);
+}
+
+.button.secondary:active:not(.disabled) {
+  transform: translateY(0);
+}
+
+/* Ghost */
+.button.ghost {
+  background: transparent;
+  color: var(--color-primary);
+  box-shadow: none;
+}
+
+.button.ghost:hover:not(.disabled) {
+  background: var(--color-primary-lighter);
+  transform: translateY(-1px);
+}
+
+.button.ghost:active:not(.disabled) {
+  transform: translateY(0);
+  background: var(--color-primary-lighter);
+}
+
+/* Danger */
+.button.danger {
+  background: var(--color-error);
+  color: white;
+  box-shadow: var(--shadow-button);
+}
+
+.button.danger:hover:not(.disabled) {
+  background: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-button-hover);
+}
+
+.button.danger:active:not(.disabled) {
+  transform: translateY(0);
+}
+
+/* ========== SIZES ========== */
+
+.button.sm {
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-sm);
+}
+
+.button.md {
+  padding: var(--space-3) var(--space-6);
+  font-size: var(--text-base);
+}
+
+.button.lg {
+  padding: var(--space-4) var(--space-8);
+  font-size: var(--text-lg);
+}
+
+/* ========== MODIFIERS ========== */
+
+.button.fullWidth {
+  width: 100%;
+  display: flex;
+}
+
+.button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ========== FOCUS STATE ========== */
+
+.button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}

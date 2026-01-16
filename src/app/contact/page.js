@@ -2,6 +2,7 @@
 
 import { Suspense, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
+import { PageContainer, SectionTitle, Card, CardContent, Button } from '@/components/ui'
 import styles from './page.module.css'
 
 function ContactForm() {
@@ -69,29 +70,40 @@ function ContactForm() {
   }
 
   return (
-    <div className={styles.contact}>
-      <div className="container">
-        <h1>Nous Contacter</h1>
+    <PageContainer spacing="lg" maxWidth="xl" background="gray">
+      <SectionTitle 
+        level="h1" 
+        align="center"
+        subtitle="Nous sommes à votre disposition pour répondre à toutes vos questions"
+        spacing="lg"
+      >
+        Nous Contacter
+      </SectionTitle>
+      
+      <div className={styles.content}>
+        <Card hoverable padding="lg" className={styles.infoCard}>
+          <CardContent>
+            <h2 className={styles.infoTitle}>Coordonnées</h2>
+            <div className={styles.infoItem}>
+              <h3 className={styles.infoLabel}>📧 Email</h3>
+              <p className={styles.infoValue}>contact@jurabreak.fr</p>
+            </div>
+            <div className={styles.infoItem}>
+              <h3 className={styles.infoLabel}>📞 Téléphone</h3>
+              <p className={styles.infoValue}>06 XX XX XX XX</p>
+            </div>
+            <div className={styles.infoItem}>
+              <h3 className={styles.infoLabel}>🏢 Adresse</h3>
+              <p className={styles.infoValue}>Jura, France</p>
+            </div>
+          </CardContent>
+        </Card>
         
-        <div className={styles.content}>
-          <div className={styles.info}>
-            <h2>Coordonnées</h2>
-            <div className={styles.infoItem}>
-              <h3>📧 Email</h3>
-              <p>contact@jurabreak.fr</p>
-            </div>
-            <div className={styles.infoItem}>
-              <h3>📞 Téléphone</h3>
-              <p>06 XX XX XX XX</p>
-            </div>
-            <div className={styles.infoItem}>
-              <h3>🏢 Adresse</h3>
-              <p>Jura, France</p>
-            </div>
-          </div>
-          
-          <form onSubmit={handleSubmit} className={styles.form}>
-            <h2>{annonceId ? 'Demander une visite' : 'Envoyez-nous un message'}</h2>
+        <Card padding="lg" className={styles.formCard}>
+          <CardContent>
+            <h2 className={styles.formTitle}>
+              {annonceId ? 'Demander une visite' : 'Envoyez-nous un message'}
+            </h2>
             
             {status.message && (
               <div className={`${styles.alert} ${styles[status.type]}`}>
@@ -99,86 +111,90 @@ function ContactForm() {
               </div>
             )}
             
-            <div className={styles.row}>
+            <form onSubmit={handleSubmit} className={styles.form}>
+              <div className={styles.row}>
+                <div className={styles.field}>
+                  <label htmlFor="nom">Nom *</label>
+                  <input
+                    type="text"
+                    id="nom"
+                    name="nom"
+                    value={formData.nom}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                
+                <div className={styles.field}>
+                  <label htmlFor="prenom">Prénom *</label>
+                  <input
+                    type="text"
+                    id="prenom"
+                    name="prenom"
+                    value={formData.prenom}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+              </div>
+              
+              <div className={styles.row}>
+                <div className={styles.field}>
+                  <label htmlFor="email">Email *</label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                
+                <div className={styles.field}>
+                  <label htmlFor="telephone">Téléphone</label>
+                  <input
+                    type="tel"
+                    id="telephone"
+                    name="telephone"
+                    value={formData.telephone}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+              
               <div className={styles.field}>
-                <label htmlFor="nom">Nom *</label>
-                <input
-                  type="text"
-                  id="nom"
-                  name="nom"
-                  value={formData.nom}
+                <label htmlFor="message">Message *</label>
+                <textarea
+                  id="message"
+                  name="message"
+                  rows="6"
+                  value={formData.message}
                   onChange={handleChange}
                   required
                 />
               </div>
               
-              <div className={styles.field}>
-                <label htmlFor="prenom">Prénom *</label>
-                <input
-                  type="text"
-                  id="prenom"
-                  name="prenom"
-                  value={formData.prenom}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            </div>
-            
-            <div className={styles.row}>
-              <div className={styles.field}>
-                <label htmlFor="email">Email *</label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              
-              <div className={styles.field}>
-                <label htmlFor="telephone">Téléphone</label>
-                <input
-                  type="tel"
-                  id="telephone"
-                  name="telephone"
-                  value={formData.telephone}
-                  onChange={handleChange}
-                />
-              </div>
-            </div>
-            
-            <div className={styles.field}>
-              <label htmlFor="message">Message *</label>
-              <textarea
-                id="message"
-                name="message"
-                rows="6"
-                value={formData.message}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            
-            <button 
-              type="submit" 
-              className={styles.submit}
-              disabled={loading}
-            >
-              {loading ? 'Envoi en cours...' : 'Envoyer'}
-            </button>
-          </form>
-        </div>
+              <Button 
+                type="submit" 
+                variant="primary"
+                size="lg"
+                fullWidth
+                disabled={loading}
+              >
+                {loading ? 'Envoi en cours...' : 'Envoyer'}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </div>
-    </div>
+    </PageContainer>
   )
 }
 
 export default function ContactPage() {
   return (
-    <Suspense fallback={<div className="container">Chargement...</div>}>
+    <Suspense fallback={<PageContainer><div>Chargement...</div></PageContainer>}>
       <ContactForm />
     </Suspense>
   )
