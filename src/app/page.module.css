@@ -13,6 +13,31 @@
   overflow: hidden;
 }
 
+/* Vidéo d'arrière-plan */
+.heroVideo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Overlay vert par-dessus la vidéo */
+.heroOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--color-secondary);
+  opacity: 0.65;
+  pointer-events: none;
+  z-index: 1;
+}
+
 /* Motif géométrique hexagonal discret */
 .heroPattern {
   position: absolute;
@@ -26,6 +51,7 @@
     repeating-linear-gradient(60deg, transparent, transparent 50px, rgba(255,255,255,0.1) 50px, rgba(255,255,255,0.1) 51px),
     repeating-linear-gradient(120deg, transparent, transparent 50px, rgba(255,255,255,0.1) 50px, rgba(255,255,255,0.1) 51px);
   pointer-events: none;
+  z-index: 1;
 }
 
 .heroContent {
@@ -38,6 +64,7 @@
   grid-template-columns: 1fr 1fr;
   gap: var(--space-16);
   align-items: center;
+  z-index: 2;
 }
 
 .heroLeft {

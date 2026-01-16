@@ -39,6 +39,21 @@ export default async function HomePage() {
     <div className={styles.home}>
       {/* HERO SECTION - Fond vert avec motif géométrique */}
       <section className={styles.hero}>
+        {/* Vidéo d'arrière-plan */}
+        <video
+          className={styles.heroVideo}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+        >
+          <source src="/videos/hero.mp4" type="video/mp4" />
+        </video>
+        
+        {/* Overlay vert */}
+        <div className={styles.heroOverlay}></div>
+        
         <div className={styles.heroPattern}></div>
         <div className={styles.heroContent}>
           <div className={styles.heroLeft}>
