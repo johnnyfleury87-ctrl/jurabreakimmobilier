@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { PageContainer, SectionTitle, Card } from '@/components/ui'
+import HeroSection from '@/components/HeroSection'
+import { Card } from '@/components/ui'
 import { calculerHonoraires, formatterHonoraires } from '@/lib/honoraires'
 import styles from './page.module.css'
 
@@ -133,133 +134,152 @@ export default function AnnoncesPage() {
 
   if (loading) {
     return (
-      <PageContainer spacing="lg" maxWidth="2xl" background="gray">
-        <div style={{ textAlign: 'center', padding: '3rem', color: '#666' }}>
-          Chargement des annonces...
+      <div className={styles.annoncesPage}>
+        <HeroSection
+          title="Nos Annonces"
+          subtitle="Découvrez notre sélection de biens immobiliers dans le Jura"
+          buttons={[
+            { href: '/contact', label: 'Nous contacter', variant: 'primary' },
+            { href: '/estimation', label: 'Demander une estimation', variant: 'secondary' }
+          ]}
+          imageSrc="/images/branding/annonce.png"
+          imageAlt="Annonces JuraBreak Immobilier"
+          minHeight="60vh"
+        />
+        <div className={styles.mainContent}>
+          <div style={{ textAlign: 'center', padding: '3rem', color: '#666' }}>
+            Chargement des annonces...
+          </div>
         </div>
-      </PageContainer>
+      </div>
     )
   }
 
   return (
-    <PageContainer spacing="lg" maxWidth="2xl" background="gray">
-      <SectionTitle 
-        level="h1" 
-        align="center"
+    <div className={styles.annoncesPage}>
+      {/* HERO SECTION - Identique à Honoraires */}
+      <HeroSection
+        title="Nos Annonces"
         subtitle="Découvrez notre sélection de biens immobiliers dans le Jura"
-        spacing="lg"
-      >
-        Nos Annonces
-      </SectionTitle>
+        buttons={[
+          { href: '/contact', label: 'Nous contacter', variant: 'primary' },
+          { href: '/estimation', label: 'Demander une estimation', variant: 'secondary' }
+        ]}
+        imageSrc="/images/branding/annonce.png"
+        imageAlt="Annonces JuraBreak Immobilier"
+        minHeight="60vh"
+      />
 
-      {/* FILTRES */}
-      <div className={styles.filtersContainer}>
-        <div className={styles.filtersGrid}>
-          <select 
-            value={filters.type_bien}
-            onChange={(e) => handleFilterChange('type_bien', e.target.value)}
-            className={styles.select}
-          >
-            <option value="all">Tous les types</option>
-            <option value="maison">Maison</option>
-            <option value="appartement">Appartement</option>
-            <option value="terrain">Terrain</option>
-            <option value="immeuble">Immeuble</option>
-            <option value="local_commercial">Local commercial</option>
-          </select>
-
-          <select 
-            value={filters.type_transaction}
-            onChange={(e) => handleFilterChange('type_transaction', e.target.value)}
-            className={styles.select}
-          >
-            <option value="all">Vente & Location</option>
-            <option value="VENTE">Vente</option>
-            <option value="LOCATION">Location</option>
-          </select>
-
-          <select 
-            value={filters.statut}
-            onChange={(e) => handleFilterChange('statut', e.target.value)}
-            className={styles.select}
-          >
-            <option value="all">Tous les statuts</option>
-            <option value="A_VENDRE">À vendre</option>
-            <option value="SOUS_COMPROMIS">Sous compromis</option>
-            <option value="EN_LOCATION">En location</option>
-            <option value="LOUE">Loué</option>
-          </select>
-
-          {villes.length > 0 && (
+      {/* CONTENU PRINCIPAL */}
+      <div className={styles.mainContent}>
+        {/* FILTRES */}
+        <div className={styles.filtersContainer}>
+          <div className={styles.filtersGrid}>
             <select 
-              value={filters.ville}
-              onChange={(e) => handleFilterChange('ville', e.target.value)}
+              value={filters.type_bien}
+              onChange={(e) => handleFilterChange('type_bien', e.target.value)}
               className={styles.select}
             >
-              <option value="all">Toutes les villes</option>
-              {villes.map(ville => (
-                <option key={ville} value={ville}>{ville}</option>
-              ))}
+              <option value="all">Tous les types</option>
+              <option value="maison">Maison</option>
+              <option value="appartement">Appartement</option>
+              <option value="terrain">Terrain</option>
+              <option value="immeuble">Immeuble</option>
+              <option value="local_commercial">Local commercial</option>
             </select>
-          )}
 
-          <input
-            type="number"
-            placeholder="Prix min"
-            value={filters.prix_min}
-            onChange={(e) => handleFilterChange('prix_min', e.target.value)}
-            className={styles.input}
-          />
+            <select 
+              value={filters.type_transaction}
+              onChange={(e) => handleFilterChange('type_transaction', e.target.value)}
+              className={styles.select}
+            >
+              <option value="all">Vente & Location</option>
+              <option value="VENTE">Vente</option>
+              <option value="LOCATION">Location</option>
+            </select>
 
-          <input
-            type="number"
-            placeholder="Prix max"
-            value={filters.prix_max}
-            onChange={(e) => handleFilterChange('prix_max', e.target.value)}
-            className={styles.input}
-          />
+            <select 
+              value={filters.statut}
+              onChange={(e) => handleFilterChange('statut', e.target.value)}
+              className={styles.select}
+            >
+              <option value="all">Tous les statuts</option>
+              <option value="A_VENDRE">À vendre</option>
+              <option value="SOUS_COMPROMIS">Sous compromis</option>
+              <option value="EN_LOCATION">En location</option>
+              <option value="LOUE">Loué</option>
+            </select>
 
-          <input
-            type="number"
-            placeholder="Surface min (m²)"
-            value={filters.surface_min}
-            onChange={(e) => handleFilterChange('surface_min', e.target.value)}
-            className={styles.input}
-          />
+            {villes.length > 0 && (
+              <select 
+                value={filters.ville}
+                onChange={(e) => handleFilterChange('ville', e.target.value)}
+                className={styles.select}
+              >
+                <option value="all">Toutes les villes</option>
+                {villes.map(ville => (
+                  <option key={ville} value={ville}>{ville}</option>
+                ))}
+              </select>
+            )}
 
-          <button onClick={resetFilters} className={styles.resetBtn}>
-            Réinitialiser
-          </button>
+            <input
+              type="number"
+              placeholder="Prix min"
+              value={filters.prix_min}
+              onChange={(e) => handleFilterChange('prix_min', e.target.value)}
+              className={styles.input}
+            />
+
+            <input
+              type="number"
+              placeholder="Prix max"
+              value={filters.prix_max}
+              onChange={(e) => handleFilterChange('prix_max', e.target.value)}
+              className={styles.input}
+            />
+
+            <input
+              type="number"
+              placeholder="Surface min (m²)"
+              value={filters.surface_min}
+              onChange={(e) => handleFilterChange('surface_min', e.target.value)}
+              className={styles.input}
+            />
+
+            <button onClick={resetFilters} className={styles.resetBtn}>
+              Réinitialiser
+            </button>
+          </div>
+
+          <div className={styles.sortBar}>
+            <span className={styles.resultsCount}>
+              {filteredAnnonces.length} résultat{filteredAnnonces.length > 1 ? 's' : ''}
+            </span>
+            <select 
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className={styles.select}
+            >
+              <option value="recent">Plus récentes</option>
+              <option value="prix_asc">Prix croissant</option>
+              <option value="prix_desc">Prix décroissant</option>
+              <option value="surface">Surface décroissante</option>
+            </select>
+          </div>
         </div>
-
-        <div className={styles.sortBar}>
-          <span className={styles.resultsCount}>
-            {filteredAnnonces.length} résultat{filteredAnnonces.length > 1 ? 's' : ''}
-          </span>
-          <select 
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className={styles.select}
-          >
-            <option value="recent">Plus récentes</option>
-            <option value="prix_asc">Prix croissant</option>
-            <option value="prix_desc">Prix décroissant</option>
-            <option value="surface">Surface décroissante</option>
-          </select>
-        </div>
-      </div>
       
-      {filteredAnnonces.length === 0 ? (
-        <Card padding="lg" className={styles.emptyCard}>
-          <p className={styles.empty}>
-            Aucune annonce ne correspond à vos critères.
-          </p>
-          <button onClick={resetFilters} className={styles.resetBtnLarge}>
-            Voir toutes les annonces
-          </button>
-        </Card>
-      ) : (
-        <div className={styles.grid}>
+        {filteredAnnonces.length === 0 ? (
+          <Card padding="lg" className={styles.emptyCard}>
+            <p className={styles.empty}>
+              Aucune annonce ne correspond à vos critères.
+            </p>
+            <button onClick={resetFilters} className={styles.resetBtnLarge}>
+              Voir toutes les annonces
+            </button>
+          </Card>
+        ) : (
+          <div className={styles.grid}>
           {filteredAnnonces.map((annonce, index) => {
             const firstPhoto = annonce.annonce_photos?.sort((a, b) => a.position - b.position)[0]
             
@@ -328,7 +348,8 @@ export default function AnnoncesPage() {
             )
           })}
         </div>
-      )}
-    </PageContainer>
+        )}
+      </div>
+    </div>
   )
 }

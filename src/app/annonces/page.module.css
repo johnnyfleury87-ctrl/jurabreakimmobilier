@@ -1,8 +1,34 @@
 /* ============================================
-   ANNONCES PAGE - Design System
+   ANNONCES PAGE
+   Design aligné sur Honoraires
+   ============================================ */
+
+.annoncesPage {
+  min-height: 100vh;
+  background: var(--color-background);
+}
+
+/* ============================================
+   CONTENU PRINCIPAL
+   ============================================ */
+
+.mainContent {
+  max-width: var(--container-lg);
+  margin: 0 auto;
+  padding: var(--space-20) var(--container-padding-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-20);
+}
+
+/* ============================================
+   FILTRES
    ============================================ */
 
 .filtersContainer {
+  opacity: 0;
+  animation: fadeInUp 0.8s ease-out forwards;
+  animation-delay: 0.1s;
   background: white;
   padding: var(--space-6);
   border-radius: var(--radius-lg);
@@ -99,6 +125,9 @@
 }
 
 .grid {
+  opacity: 0;
+  animation: fadeInUp 0.8s ease-out forwards;
+  animation-delay: 0.3s;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: var(--space-8);
@@ -246,8 +275,41 @@
   font-style: italic;
 }
 
-/* Responsive */
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   RESPONSIVE - TABLETTE
+   ============================================ */
+
+@media (max-width: 1024px) {
+  .mainContent {
+    padding: var(--space-16) var(--container-padding-md);
+  }
+}
+
+/* ============================================
+   RESPONSIVE - MOBILE
+   ============================================ */
+
 @media (max-width: 768px) {
+  .mainContent {
+    padding: var(--space-12) var(--container-padding-sm);
+    gap: var(--space-16);
+  }
+
   .filtersContainer {
     padding: var(--space-4);
   }
@@ -279,7 +341,18 @@
   }
 }
 
+/* ============================================
+   ACCESSIBILITÉ - Prefers Reduced Motion
+   ============================================ */
+
 @media (prefers-reduced-motion: reduce) {
+  .filtersContainer,
+  .grid {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
   .annonceCard {
     animation: none;
   }
