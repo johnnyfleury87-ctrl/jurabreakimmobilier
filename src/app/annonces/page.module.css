@@ -181,6 +181,24 @@
   backdrop-filter: blur(4px);
 }
 
+/* Classes basées sur annonces-config.js */
+.badge.disponible {
+  background: #2d6a4f; /* Vert - À vendre / En location */
+}
+
+.badge.compromis {
+  background: #ff9800; /* Orange - Sous compromis */
+}
+
+.badge.indisponible {
+  background: #f44336; /* Rouge - Vendu / Loué */
+}
+
+.badge.retire {
+  background: #757575; /* Gris - Retiré */
+}
+
+/* Anciennes classes maintenues pour rétrocompatibilité */
 .badge.a_vendre {
   background: #2d6a4f;
 }

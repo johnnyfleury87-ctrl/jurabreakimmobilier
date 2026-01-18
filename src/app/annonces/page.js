@@ -6,6 +6,7 @@ import HeroSection from '@/components/HeroSection'
 import AnnonceMedia from '@/components/AnnonceMedia'
 import { Card } from '@/components/ui'
 import { calculerHonoraires, formatterHonoraires } from '@/lib/honoraires'
+import { getStatutLabel, getStatutCssClass } from '@/lib/annonces-config'
 import styles from './page.module.css'
 
 export default function AnnoncesPage() {
@@ -304,8 +305,8 @@ export default function AnnoncesPage() {
                         mode={annonce.mode_affichage || 'statique'}
                         alt={annonce.titre}
                       />
-                      <div className={`${styles.badge} ${styles[annonce.statut?.toLowerCase()]}`}>
-                        {annonce.statut?.replace('_', ' ')}
+                      <div className={`${styles.badge} ${styles[getStatutCssClass(annonce.statut)]}`}>
+                        {getStatutLabel(annonce.statut)}
                       </div>
                       <div className={styles.transactionBadge}>
                         {annonce.type_transaction === 'VENTE' ? '💰 Vente' : '🏠 Location'}

@@ -3,6 +3,12 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { calculerHonoraires, formatterHonoraires } from '@/lib/honoraires'
+import { 
+  TYPE_TRANSACTION, 
+  getStatutsAutorises, 
+  getStatutParDefaut,
+  corrigerStatut
+} from '@/lib/annonces-config'
 import styles from './page.module.css'
 
 export default function NewAnnoncePage() {
@@ -86,6 +92,17 @@ export default function NewAnnoncePage() {
     })
     setHonoraires(result)
   }, [formData.type_transaction, formData.type_bien, formData.prix, formData.loyer_hc, formData.surface_m2])
+
+  // Corriger automatiquement le statut si incohérent avec type_transaction
+  useEffect(() => {
+    const statutCorrige = corrigerStatut(formData.type_transaction, formData.statut)
+    if (statutCorrige !== formData.statut) {
+      setFormData(prev => ({
+        ...prev,
+        statut: statutCorrige
+      }))
+    }
+  }, [formData.type_transaction, formData.statut])
 
   function handleChange(e) {
     const { name, value, type, checked } = e.target
@@ -768,20 +785,33 @@ export default function NewAnnoncePage() {
           
           <div className={styles.fieldRow}>
             <div className={styles.field}>
-              <label htmlFor="statut">Statut</label>
+              <label htmlFor="statut">Statut *</label>
               <select
                 id="statut"
                 name="statut"
                 value={formData.statut}
                 onChange={handleChange}
+                required
               >
-                <option value="A_VENDRE">À vendre</option>
-                <option value="SOUS_COMPROMIS">Sous compromis</option>
-                <option value="VENDU">Vendu</option>
-                <option value="EN_LOCATION">En location</option>
-                <option value="LOUE">Loué</option>
-                <option value="RETIRE">Retiré</option>
+                {getStatutsAutorises(formData.type_transaction).map(statutKey => {
+                  const labels = {
+                    'A_VENDRE': 'À vendre',
+                    'SOUS_COMPROMIS': 'Sous compromis',
+                    'VENDU': 'Vendu',
+                    'EN_LOCATION': 'Disponible à la location',
+                    'LOUE': 'Loué',
+                    'RETIRE': 'Retiré'
+                  }
+                  return (
+                    <option key={statutKey} value={statutKey}>
+                      {labels[statutKey]}
+                    </option>
+                  )
+                })}
               </select>
+              <small className={styles.fieldHint}>
+                Statuts disponibles pour {formData.type_transaction === 'VENTE' ? 'une vente' : 'une location'}
+              </small>
             </div>
 
             <div className={styles.field}>
