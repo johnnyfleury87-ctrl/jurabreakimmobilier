@@ -102,6 +102,7 @@ export default function EditAnnoncePage() {
         
         video_url: annonce.video_url || '',
         visite_virtuelle_url: annonce.visite_virtuelle_url || '',
+        mode_affichage: annonce.mode_affichage || 'statique',
         
         statut: annonce.statut || 'A_VENDRE',
         visible: annonce.visible !== undefined ? annonce.visible : true,
@@ -577,6 +578,53 @@ export default function EditAnnoncePage() {
               ))}
             </div>
           )}
+        </section>
+
+        {/* MEDIA */}
+        <section className={styles.section}>
+          <h2>Médias supplémentaires</h2>
+          
+          <div className={styles.field}>
+            <label htmlFor="video_url">URL Vidéo (YouTube, Vimeo...)</label>
+            <input
+              type="url"
+              id="video_url"
+              name="video_url"
+              value={formData.video_url}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className={styles.field}>
+            <label htmlFor="visite_virtuelle_url">URL Visite virtuelle</label>
+            <input
+              type="url"
+              id="visite_virtuelle_url"
+              name="visite_virtuelle_url"
+              value={formData.visite_virtuelle_url}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className={styles.field}>
+            <label htmlFor="mode_affichage">Mode d'affichage des photos *</label>
+            <select
+              id="mode_affichage"
+              name="mode_affichage"
+              value={formData.mode_affichage}
+              onChange={handleChange}
+              required
+            >
+              <option value="statique">📷 Statique (photo principale uniquement)</option>
+              <option value="dynamique">🔁 Dynamique (carousel discret)</option>
+              <option value="film">🎬 Film (défilement continu)</option>
+              <option value="focus">✨ Focus alterné (changement fade)</option>
+              <option value="hover">👆 Hover only (au survol desktop)</option>
+            </select>
+            <small className={styles.fieldHint}>
+              Définit comment les photos sont présentées sur la page publique
+            </small>
+          </div>
         </section>
 
         {/* STATUT */}

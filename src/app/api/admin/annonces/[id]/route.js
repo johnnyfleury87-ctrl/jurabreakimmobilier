@@ -111,6 +111,7 @@ export async function PUT(request, { params }) {
       
       video_url: body.video_url,
       visite_virtuelle_url: body.visite_virtuelle_url,
+      mode_affichage: body.mode_affichage || 'statique',
       
       statut: body.statut,
       visible: body.visible,

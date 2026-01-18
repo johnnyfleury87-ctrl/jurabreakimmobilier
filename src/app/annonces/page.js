@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import HeroSection from '@/components/HeroSection'
+import AnnonceMedia from '@/components/AnnonceMedia'
 import { Card } from '@/components/ui'
 import { calculerHonoraires, formatterHonoraires } from '@/lib/honoraires'
 import styles from './page.module.css'
@@ -281,8 +281,6 @@ export default function AnnoncesPage() {
         ) : (
           <div className={styles.grid}>
           {filteredAnnonces.map((annonce, index) => {
-            const firstPhoto = annonce.annonce_photos?.sort((a, b) => a.position - b.position)[0]
-            
             // Calculer les honoraires pour affichage
             const honoraires = calculerHonoraires({
               typeTransaction: annonce.type_transaction,
@@ -299,14 +297,12 @@ export default function AnnoncesPage() {
                 className={styles.cardLink}
               >
                 <Card hoverable clickable padding="none" className={styles.annonceCard} style={{ animationDelay: `${index * 50}ms` }}>
-                  {firstPhoto && (
+                  {annonce.annonce_photos && annonce.annonce_photos.length > 0 && (
                     <div className={styles.imageContainer}>
-                      <Image 
-                        src={firstPhoto.url}
+                      <AnnonceMedia
+                        photos={annonce.annonce_photos.sort((a, b) => a.position - b.position)}
+                        mode={annonce.mode_affichage || 'statique'}
                         alt={annonce.titre}
-                        width={400}
-                        height={300}
-                        className={styles.image}
                       />
                       <div className={`${styles.badge} ${styles[annonce.statut?.toLowerCase()]}`}>
                         {annonce.statut?.replace('_', ' ')}

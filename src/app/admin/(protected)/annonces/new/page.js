@@ -65,6 +65,7 @@ export default function NewAnnoncePage() {
     // MEDIA
     video_url: '',
     visite_virtuelle_url: '',
+    mode_affichage: 'statique',
     
     // STATUT
     statut: 'A_VENDRE',
@@ -738,6 +739,26 @@ export default function NewAnnoncePage() {
               value={formData.visite_virtuelle_url}
               onChange={handleChange}
             />
+          </div>
+
+          <div className={styles.field}>
+            <label htmlFor="mode_affichage">Mode d'affichage des photos *</label>
+            <select
+              id="mode_affichage"
+              name="mode_affichage"
+              value={formData.mode_affichage}
+              onChange={handleChange}
+              required
+            >
+              <option value="statique">📷 Statique (photo principale uniquement)</option>
+              <option value="dynamique">🔁 Dynamique (carousel discret)</option>
+              <option value="film">🎬 Film (défilement continu)</option>
+              <option value="focus">✨ Focus alterné (changement fade)</option>
+              <option value="hover">👆 Hover only (au survol desktop)</option>
+            </select>
+            <small className={styles.fieldHint}>
+              Définit comment les photos sont présentées sur la page publique
+            </small>
           </div>
         </section>
 

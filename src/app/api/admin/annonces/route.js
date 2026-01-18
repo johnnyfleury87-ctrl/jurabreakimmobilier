@@ -120,6 +120,7 @@ export async function POST(request) {
       
       video_url: body.video_url,
       visite_virtuelle_url: body.visite_virtuelle_url,
+      mode_affichage: body.mode_affichage || 'statique',
       
       statut: body.statut || 'A_VENDRE',
       visible: body.visible !== undefined ? body.visible : true,
