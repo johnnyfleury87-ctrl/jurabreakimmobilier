@@ -265,13 +265,46 @@
 .formuleCard li {
   padding: 0.5rem 0;
   border-top: 1px solid #e0e0e0;
+  font-size: 0.9rem;
 }
 
-.formuleCard li:before {
-  content: "✓ ";
-  color: #28a745;
-  font-weight: 600;
-  margin-right: 0.5rem;
+.formuleLegend {
+  margin-top: 2rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+.formuleLegend p {
+  margin: 0.5rem 0;
+}
+
+.premiumFields {
+  background-color: #f3f0ff;
+  border: 2px solid #8b5cf6;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.premiumFields h3 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+}
+
+.optionsSection {
+  margin-top: 2rem;
+}
+
+.optionsSection h3 {
+  margin-bottom: 0.5rem;
+}
+
+.optionsSection > p {
+  color: #666;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
 }
 
 .navigation {

@@ -10,11 +10,13 @@ import { createClient } from '@/lib/supabase/client'
 import styles from './page.module.css'
 
 export default function AdminEstimationPage() {
-  const [activeTab, setActiveTab] = useState('communes')
+  const [activeTab, setActiveTab] = useState('parametres')
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState(null)
   
   // États pour chaque section
+  const [parametresGlobaux, setParametresGlobaux] = useState([])
+  const [configFormules, setConfigFormules] = useState([])
   const [zones, setZones] = useState([])
   const [communes, setCommunes] = useState([])
   const [coefficients, setCoefficients] = useState([])
@@ -34,6 +36,16 @@ export default function AdminEstimationPage() {
     setLoading(true)
     try {
       switch (activeTab) {
+        case 'parametres':
+          // Charger paramètres globaux et config formules
+          const response = await fetch('/api/admin/estimation/parametres')
+          const data = await response.json()
+          if (data.success) {
+            setParametresGlobaux(data.parametres_globaux || [])
+            setConfigFormules(data.config_formules || [])
+          }
+          break
+          
         case 'zones':
           const { data: zonesData } = await supabase
             .from('estimation_zones')
@@ -187,6 +199,52 @@ export default function AdminEstimationPage() {
     }
   }
   
+  async function handleUpdateParametreGlobal(cle, valeur) {
+    try {
+      const response = await fetch('/api/admin/estimation/parametres', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'parametre_global',
+          cle,
+          valeur
+        })
+      })
+      
+      if (response.ok) {
+        setMessage({ type: 'success', text: 'Paramètre mis à jour' })
+        loadData()
+      } else {
+        throw new Error('Erreur mise à jour')
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: error.message })
+    }
+  }
+  
+  async function handleUpdateConfigFormule(formule, updates) {
+    try {
+      const response = await fetch('/api/admin/estimation/parametres', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'config_formule',
+          formule,
+          updates
+        })
+      })
+      
+      if (response.ok) {
+        setMessage({ type: 'success', text: 'Configuration formule mise à jour' })
+        loadData()
+      } else {
+        throw new Error('Erreur mise à jour')
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: error.message })
+    }
+  }
+  
   async function handleCreateVersion(description) {
     try {
       const response = await fetch('/api/admin/estimation/create-version', {
@@ -217,6 +275,12 @@ export default function AdminEstimationPage() {
       )}
       
       <div className={styles.tabs}>
+        <button
+          className={activeTab === 'parametres' ? styles.active : ''}
+          onClick={() => setActiveTab('parametres')}
+        >
+          ⚙️ Paramètres Globaux
+        </button>
         <button
           className={activeTab === 'communes' ? styles.active : ''}
           onClick={() => setActiveTab('communes')}
@@ -266,6 +330,14 @@ export default function AdminEstimationPage() {
           <p>Chargement...</p>
         ) : (
           <>
+            {activeTab === 'parametres' && (
+              <ParametresTab
+                parametresGlobaux={parametresGlobaux}
+                configFormules={configFormules}
+                onUpdateParametre={handleUpdateParametreGlobal}
+                onUpdateFormule={handleUpdateConfigFormule}
+              />
+            )}
             {activeTab === 'zones' && (
               <ZonesTab zones={zones} onSave={handleSaveZone} />
             )}
@@ -297,6 +369,139 @@ export default function AdminEstimationPage() {
 // =====================================================================
 // COMPOSANTS ONGLETS
 // =====================================================================
+
+function ParametresTab({ parametresGlobaux, configFormules, onUpdateParametre, onUpdateFormule }) {
+  return (
+    <div>
+      <h2>⚙️ Paramètres Globaux</h2>
+      
+      <div className={styles.parametresSection}>
+        <h3>Contrôles du Service</h3>
+        <p className={styles.helpText}>
+          Ces paramètres permettent d'activer/désactiver le module et de contrôler la génération PDF et l'envoi email.
+        </p>
+        
+        <div className={styles.parametresList}>
+          {parametresGlobaux.map(param => (
+            <div key={param.cle} className={styles.parametreItem}>
+              <div className={styles.parametreInfo}>
+                <h4>{param.cle.replace(/_/g, ' ').toUpperCase()}</h4>
+                <p>{param.description}</p>
+              </div>
+              <label className={styles.switch}>
+                <input
+                  type="checkbox"
+                  checked={param.valeur}
+                  onChange={(e) => onUpdateParametre(param.cle, e.target.checked)}
+                />
+                <span className={styles.slider}></span>
+              </label>
+            </div>
+          ))}
+        </div>
+      </div>
+      
+      <div className={styles.formulesSection}>
+        <h3>Configuration des Formules</h3>
+        <p className={styles.helpText}>
+          Définissez les autorisations PDF et Email pour chaque formule.
+        </p>
+        
+        <div className={styles.formulesGrid}>
+          {configFormules.map(formule => (
+            <div key={formule.formule} className={styles.formuleConfig}>
+              <div className={styles.formuleHeader}>
+                <h4>{formule.nom_affichage}</h4>
+                <span className={styles.prix}>{formule.prix}€</span>
+              </div>
+              
+              <p className={styles.description}>{formule.description}</p>
+              
+              <div className={styles.formuleControls}>
+                <label className={styles.checkboxControl}>
+                  <input
+                    type="checkbox"
+                    checked={formule.pdf_autorise}
+                    onChange={(e) => onUpdateFormule(formule.formule, { pdf_autorise: e.target.checked })}
+                  />
+                  <span>✅ PDF autorisé</span>
+                </label>
+                
+                <label className={styles.checkboxControl}>
+                  <input
+                    type="checkbox"
+                    checked={formule.email_autorise}
+                    onChange={(e) => onUpdateFormule(formule.formule, { email_autorise: e.target.checked })}
+                  />
+                  <span>📧 Email autorisé</span>
+                </label>
+                
+                <label className={styles.checkboxControl}>
+                  <input
+                    type="checkbox"
+                    checked={formule.champs_premium_requis}
+                    onChange={(e) => onUpdateFormule(formule.formule, { champs_premium_requis: e.target.checked })}
+                  />
+                  <span>⭐ Champs premium requis</span>
+                </label>
+                
+                <label className={styles.checkboxControl}>
+                  <input
+                    type="checkbox"
+                    checked={formule.actif}
+                    onChange={(e) => onUpdateFormule(formule.formule, { actif: e.target.checked })}
+                  />
+                  <span>🟢 Formule active</span>
+                </label>
+              </div>
+              
+              {formule.formule === 'gratuite' && (
+                <div className={styles.warning}>
+                  ⚠️ La formule gratuite ne doit JAMAIS générer de PDF ni envoyer d'email
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+      
+      <div className={styles.logicSection}>
+        <h3>📋 Logique Produit</h3>
+        <div className={styles.logicGrid}>
+          <div className={styles.logicItem}>
+            <h4>🟢 Gratuite</h4>
+            <ul>
+              <li>✓ Affichage écran uniquement</li>
+              <li>✓ Fourchette visible</li>
+              <li>✗ Pas de PDF</li>
+              <li>✗ Pas d'email</li>
+            </ul>
+          </div>
+          
+          <div className={styles.logicItem}>
+            <h4>🔵 Standard</h4>
+            <ul>
+              <li>✓ PDF généré</li>
+              <li>✓ Téléchargeable</li>
+              <li>✓ Email si activé</li>
+              <li>✓ Données complètes</li>
+            </ul>
+          </div>
+          
+          <div className={styles.logicItem}>
+            <h4>⭐ Premium</h4>
+            <ul>
+              <li>✓ PDF généré</li>
+              <li>✓ Champs supplémentaires</li>
+              <li>✓ Email automatique</li>
+              <li>✓ Rapport détaillé</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 function ZonesTab({ zones, onSave }) {
   const [editingZone, setEditingZone] = useState(null)

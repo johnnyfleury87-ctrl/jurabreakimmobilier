@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import Stripe from 'stripe'
 import { generateEstimationPDF } from '@/lib/pdfGenerator'
+import { isPdfAutoriseForFormule, isEmailAutoriseForFormule } from '@/lib/estimation/permissions'
 import crypto from 'crypto'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
@@ -67,38 +68,57 @@ export async function POST(request) {
           if (fetchError || !estimation) {
             console.error('Error fetching estimation for PDF:', fetchError)
           } else {
-            // ⚠️ IDEMPOTENCE : Vérifier si PDF déjà généré
-            // Si webhook Stripe arrive 2 fois, on ne génère pas 2 PDF
-            if (estimation.pdf_path) {
-              console.log(`PDF already exists for estimation ${estimationId}, skipping generation`)
-            } else {
-              // Générer le PDF
-              const pdfBuffer = await generateEstimationPDF(estimation, formule)
+            // ⚠️ VÉRIFIER SI PDF AUTORISÉ POUR CETTE FORMULE
+            const pdfAutorise = await isPdfAutoriseForFormule(estimation.formule)
             
-              // Uploader dans Supabase Storage (bucket 'estimations' privé)
-              const fileName = `estimation_${estimationId}_${Date.now()}.pdf`
-              const { data: uploadData, error: uploadError } = await supabase.storage
-                .from('estimations')
-                .upload(fileName, pdfBuffer, {
-                  contentType: 'application/pdf',
-                  cacheControl: '3600',
-                  upsert: false
-                })
-              
-              if (uploadError) {
-                console.error('Error uploading PDF:', uploadError)
+            if (!pdfAutorise) {
+              console.log(`PDF generation NOT AUTHORIZED for formule: ${estimation.formule}`)
+              // Ne pas générer de PDF si non autorisé
+            } else {
+              // ⚠️ IDEMPOTENCE : Vérifier si PDF déjà généré
+              if (estimation.pdf_path) {
+                console.log(`PDF already exists for estimation ${estimationId}, skipping generation`)
               } else {
-                // Stocker le path Storage (pas l'URL signée)
-                // L'URL signée sera générée server-side à la demande
-                await supabase
+                // Générer le PDF
+                console.log(`Generating PDF for estimation ${estimationId} (formule: ${estimation.formule})`)
+                const pdfBuffer = await generateEstimationPDF(estimation, estimation.formule)
+              
+                // Uploader dans Supabase Storage (bucket 'estimations' privé)
+                const fileName = `estimation_${estimationId}_${Date.now()}.pdf`
+                const { data: uploadData, error: uploadError } = await supabase.storage
                   .from('estimations')
-                  .update({ pdf_path: fileName })
-                  .eq('id', estimationId)
+                  .upload(fileName, pdfBuffer, {
+                    contentType: 'application/pdf',
+                    cacheControl: '3600',
+                    upsert: false
+                  })
                 
-                console.log(`PDF generated and uploaded: ${fileName}`)
+                if (uploadError) {
+                  console.error('Error uploading PDF:', uploadError)
+                } else {
+                  // Stocker le path Storage
+                  await supabase
+                    .from('estimations')
+                    .update({ 
+                      pdf_path: fileName,
+                      pdf_generated_at: new Date().toISOString()
+                    })
+                    .eq('id', estimationId)
                   
-                // TODO: Envoyer email avec lien vers le PDF
-                // Note: Nécessite configuration d'un service email (Resend, Sendgrid, etc.)
+                  console.log(`PDF generated and uploaded: ${fileName}`)
+                  
+                  // ⚠️ VÉRIFIER SI EMAIL AUTORISÉ
+                  const emailAutorise = await isEmailAutoriseForFormule(estimation.formule)
+                  
+                  if (emailAutorise) {
+                    console.log(`Email AUTHORIZED for formule: ${estimation.formule}`)
+                    // TODO: Envoyer email avec lien vers le PDF
+                    // À implémenter avec service email (Resend, Sendgrid, etc.)
+                    // Le lien doit utiliser le download_token pour sécuriser l'accès
+                  } else {
+                    console.log(`Email NOT AUTHORIZED for formule: ${estimation.formule}`)
+                  }
+                }
               }
             }
           }

@@ -1,14 +1,14 @@
 /**
- * Formulaire d'estimation - Parcours en 6 étapes
+ * Formulaire d'estimation - Parcours en 6 étapes RESTRUCTURÉ
  * Strictement conforme à docs/estimation.md
  * 
  * ÉTAPES :
  * 1. Inscription / Connexion (obligatoire)
  * 2. Choix du motif
  * 3. Données du bien
- * 4. Options / Plus-values
- * 5. Consentement légal
- * 6. Paiement (si formule payante)
+ * 4. Choix de la formule (NOUVEAU PLACEMENT)
+ * 5. Consentement légal (connaissant la formule)
+ * 6. Options / Plus-values (uniquement si premium)
  */
 
 'use client'
@@ -55,14 +55,18 @@ export default function EstimationForm() {
     annee_construction: '',
     etat_bien: 'bon',
     
-    // Étape 4: Options
-    options_selectionnees: [],
+    // Étape 4: Formule
+    formule: 'gratuite',
     
     // Étape 5: Consentement
     consentement_accepte: false,
     
-    // Étape 6: Formule
-    formule: 'gratuite'
+    // Étape 6: Options (requis uniquement si premium)
+    options_selectionnees: [],
+    nb_pieces: '',
+    nb_chambres: '',
+    environnement: '',
+    travaux: ''
   })
   
   // Vérifier l'authentification au montage
@@ -192,9 +196,20 @@ export default function EstimationForm() {
           formData.etat_bien
         )
       case 4:
-        return true // Options facultatives
+        return formData.formule !== '' // Formule obligatoire
       case 5:
-        return formData.consentement_accepte
+        return formData.consentement_accepte // Consentement après formule
+      case 6:
+        // Si premium, champs supplémentaires requis
+        if (formData.formule === 'premium') {
+          return (
+            formData.nb_pieces &&
+            formData.nb_chambres &&
+            formData.environnement &&
+            formData.travaux
+          )
+        }
+        return true // Options facultatives pour autres formules
       default:
         return true
     }
@@ -219,8 +234,8 @@ export default function EstimationForm() {
   // =====================================================================
   
   async function handleSubmit() {
-    if (!canProceed(5)) {
-      setError('Vous devez accepter les conditions légales')
+    if (!canProceed(6)) {
+      setError('Veuillez compléter tous les champs requis')
       return
     }
     
@@ -240,7 +255,7 @@ export default function EstimationForm() {
         throw new Error(result.error || 'Erreur lors de la création')
       }
       
-      // Si formule gratuite : afficher résultat
+      // Si formule gratuite : afficher résultat uniquement à l'écran
       if (result.formule === 'gratuite') {
         router.push(`/estimation/resultat/${result.estimation_id}`)
       }
@@ -308,12 +323,11 @@ export default function EstimationForm() {
           />
         )}
         
-        {/* ÉTAPE 4 : OPTIONS */}
+        {/* ÉTAPE 4 : CHOIX DE LA FORMULE */}
         {currentStep === 4 && (
-          <Step4Options
+          <Step4Formule
             formData={formData}
             setFormData={setFormData}
-            options={options}
           />
         )}
         
@@ -325,11 +339,12 @@ export default function EstimationForm() {
           />
         )}
         
-        {/* ÉTAPE 6 : FORMULE / PAIEMENT */}
+        {/* ÉTAPE 6 : OPTIONS / CHAMPS PREMIUM */}
         {currentStep === 6 && (
-          <Step6Formule
+          <Step6OptionsEtPremium
             formData={formData}
             setFormData={setFormData}
+            options={options}
           />
         )}
       </div>
@@ -580,41 +595,76 @@ function Step3Bien({ formData, setFormData, communes, onLoadCommunes }) {
   )
 }
 
-function Step4Options({ formData, setFormData, options }) {
-  function toggleOption(code) {
-    const selected = formData.options_selectionnees || []
-    if (selected.includes(code)) {
-      setFormData({
-        ...formData,
-        options_selectionnees: selected.filter(o => o !== code)
-      })
-    } else {
-      setFormData({
-        ...formData,
-        options_selectionnees: [...selected, code]
-      })
+function Step4Formule({ formData, setFormData }) {
+  const formules = [
+    {
+      value: 'gratuite',
+      nom: 'Formule Gratuite',
+      prix: 'Gratuit',
+      features: [
+        '✓ Estimation affichée à l\'écran uniquement',
+        '✓ Fourchette de prix visible',
+        '✗ Pas de PDF',
+        '✗ Pas d\'envoi par email',
+        '✓ Données minimales'
+      ],
+      color: '#10b981'
+    },
+    {
+      value: 'standard',
+      nom: 'Formule Standard',
+      prix: '49€',
+      features: [
+        '✓ Estimation complète',
+        '✓ PDF généré et téléchargeable',
+        '✓ Accessible dans votre espace client',
+        '✓ Envoi email (si activé)',
+        '✓ Analyse détaillée'
+      ],
+      color: '#3b82f6'
+    },
+    {
+      value: 'premium',
+      nom: 'Formule Premium',
+      prix: '149€',
+      features: [
+        '✓ Estimation complète',
+        '✓ PDF généré et téléchargeable',
+        '✓ Champs supplémentaires obligatoires',
+        '✓ Envoi email automatique',
+        '✓ Rapport détaillé avec photos'
+      ],
+      color: '#8b5cf6'
     }
-  }
+  ]
   
   return (
     <div className={styles.step}>
-      <h2>Étape 4 : Options / Plus-values</h2>
-      <p>Sélectionnez les éléments présents (facultatif)</p>
+      <h2>Étape 4 : Choisissez votre formule</h2>
+      <p>Sélectionnez le niveau de service souhaité</p>
       
-      <div className={styles.checkboxGroup}>
-        {options.map(option => (
-          <label key={option.code} className={styles.checkboxLabel}>
-            <input
-              type="checkbox"
-              checked={(formData.options_selectionnees || []).includes(option.code)}
-              onChange={() => toggleOption(option.code)}
-            />
-            <span>{option.libelle}</span>
-            <span className={styles.optionValue}>
-              {option.type_valeur === 'fixe' ? `+${option.valeur}€` : `+${option.valeur}%`}
-            </span>
-          </label>
+      <div className={styles.formules}>
+        {formules.map(formule => (
+          <div
+            key={formule.value}
+            className={`${styles.formuleCard} ${formData.formule === formule.value ? styles.selected : ''}`}
+            onClick={() => setFormData({ ...formData, formule: formule.value })}
+            style={{ borderColor: formData.formule === formule.value ? formule.color : '#ddd' }}
+          >
+            <h3>{formule.nom}</h3>
+            <div className={styles.prix} style={{ color: formule.color }}>{formule.prix}</div>
+            <ul>
+              {formule.features.map((f, i) => (
+                <li key={i} style={{ color: f.startsWith('✗') ? '#999' : '#333' }}>{f}</li>
+              ))}
+            </ul>
+          </div>
         ))}
+      </div>
+      
+      <div className={styles.formuleLegend}>
+        <p><strong>🟢 Gratuite :</strong> Affichage écran uniquement, pas de PDF généré</p>
+        <p><strong>🔵 Standard / Premium :</strong> PDF généré, envoi email selon paramétrage admin</p>
       </div>
     </div>
   )
@@ -662,48 +712,99 @@ function Step5Consentement({ formData, setFormData }) {
   )
 }
 
-function Step6Formule({ formData, setFormData }) {
-  const formules = [
-    {
-      value: 'gratuite',
-      nom: 'Formule Gratuite',
-      prix: 'Gratuit',
-      features: ['Estimation automatique', 'Fourchette de prix', 'PDF basique']
-    },
-    {
-      value: 'standard',
-      nom: 'Formule Standard',
-      prix: '49€',
-      features: ['Analyse marché local', 'PDF détaillé', 'Support email']
-    },
-    {
-      value: 'premium',
-      nom: 'Formule Premium',
-      prix: '149€',
-      features: ['Visite sur place', 'Rapport signé', 'Valeur juridiquement viable']
+function Step6OptionsEtPremium({ formData, setFormData, options }) {
+  function toggleOption(code) {
+    const selected = formData.options_selectionnees || []
+    if (selected.includes(code)) {
+      setFormData({
+        ...formData,
+        options_selectionnees: selected.filter(o => o !== code)
+      })
+    } else {
+      setFormData({
+        ...formData,
+        options_selectionnees: [...selected, code]
+      })
     }
-  ]
+  }
   
   return (
     <div className={styles.step}>
-      <h2>Étape 6 : Choisissez votre formule</h2>
+      <h2>Étape 6 : Informations complémentaires</h2>
       
-      <div className={styles.formules}>
-        {formules.map(formule => (
-          <div
-            key={formule.value}
-            className={`${styles.formuleCard} ${formData.formule === formule.value ? styles.selected : ''}`}
-            onClick={() => setFormData({ ...formData, formule: formule.value })}
+      {/* CHAMPS OBLIGATOIRES POUR PREMIUM */}
+      {formData.formule === 'premium' && (
+        <div className={styles.premiumFields}>
+          <h3 style={{ color: '#8b5cf6' }}>⭐ Champs requis pour la formule Premium</h3>
+          
+          <label>Nombre de pièces *</label>
+          <input
+            type="number"
+            placeholder="Nombre de pièces"
+            value={formData.nb_pieces}
+            onChange={e => setFormData({ ...formData, nb_pieces: e.target.value })}
+            min="1"
+            required
+          />
+          
+          <label>Nombre de chambres *</label>
+          <input
+            type="number"
+            placeholder="Nombre de chambres"
+            value={formData.nb_chambres}
+            onChange={e => setFormData({ ...formData, nb_chambres: e.target.value })}
+            min="0"
+            required
+          />
+          
+          <label>Environnement *</label>
+          <select
+            value={formData.environnement}
+            onChange={e => setFormData({ ...formData, environnement: e.target.value })}
+            required
           >
-            <h3>{formule.nom}</h3>
-            <div className={styles.prix}>{formule.prix}</div>
-            <ul>
-              {formule.features.map((f, i) => (
-                <li key={i}>{f}</li>
-              ))}
-            </ul>
-          </div>
-        ))}
+            <option value="">Sélectionner...</option>
+            <option value="centre_ville">Centre-ville</option>
+            <option value="periurbain">Périurbain</option>
+            <option value="rural">Rural</option>
+            <option value="montagne">Montagne</option>
+          </select>
+          
+          <label>Travaux récents *</label>
+          <select
+            value={formData.travaux}
+            onChange={e => setFormData({ ...formData, travaux: e.target.value })}
+            required
+          >
+            <option value="">Sélectionner...</option>
+            <option value="aucun">Aucun</option>
+            <option value="mineurs">Travaux mineurs (-5 ans)</option>
+            <option value="majeurs">Rénovation majeure (-5 ans)</option>
+            <option value="complet">Rénovation complète (-5 ans)</option>
+          </select>
+        </div>
+      )}
+      
+      {/* OPTIONS FACULTATIVES POUR TOUTES LES FORMULES */}
+      <div className={styles.optionsSection}>
+        <h3>Options / Plus-values (facultatif)</h3>
+        <p>Sélectionnez les éléments présents pour affiner l'estimation</p>
+        
+        <div className={styles.checkboxGroup}>
+          {options.map(option => (
+            <label key={option.code} className={styles.checkboxLabel}>
+              <input
+                type="checkbox"
+                checked={(formData.options_selectionnees || []).includes(option.code)}
+                onChange={() => toggleOption(option.code)}
+              />
+              <span>{option.libelle}</span>
+              <span className={styles.optionValue}>
+                {option.type_valeur === 'fixe' ? `+${option.valeur}€` : `+${option.valeur}%`}
+              </span>
+            </label>
+          ))}
+        </div>
       </div>
     </div>
   )

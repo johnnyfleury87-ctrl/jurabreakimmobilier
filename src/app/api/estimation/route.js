@@ -88,6 +88,32 @@ export async function POST(request) {
     // CRÉATION EN BASE
     // =====================================================================
     const formule = body.formule || 'gratuite'
+    
+    // Vérifier la config de la formule
+    const { data: configFormule } = await supabase
+      .from('estimation_config_formules')
+      .select('*')
+      .eq('formule', formule)
+      .eq('actif', true)
+      .single()
+    
+    if (!configFormule) {
+      return NextResponse.json(
+        { error: 'Formule non disponible' },
+        { status: 400 }
+      )
+    }
+    
+    // Vérifier les champs premium si requis
+    if (configFormule.champs_premium_requis) {
+      if (!body.nb_pieces || !body.nb_chambres || !body.environnement || !body.travaux) {
+        return NextResponse.json(
+          { error: 'Champs supplémentaires requis pour la formule Premium' },
+          { status: 400 }
+        )
+      }
+    }
+    
     const downloadToken = crypto.randomBytes(32).toString('hex')
     
     const insertData = {
@@ -107,6 +133,13 @@ export async function POST(request) {
       annee_construction: body.annee_construction ? parseInt(body.annee_construction) : null,
       etat_bien: body.etat_bien,
       options_selectionnees: JSON.stringify(body.options_selectionnees || []),
+      
+      // Champs premium (si fournis)
+      nb_pieces: body.nb_pieces ? parseInt(body.nb_pieces) : null,
+      nb_chambres: body.nb_chambres ? parseInt(body.nb_chambres) : null,
+      environnement: body.environnement || null,
+      travaux: body.travaux || null,
+      
       consentement_accepte: true,
       consentement_ip: ip,
       consentement_at: new Date().toISOString(),
@@ -142,6 +175,7 @@ export async function POST(request) {
     // RETOUR
     // =====================================================================
     if (formule === 'gratuite') {
+      // IMPORTANT : Pas de génération PDF pour la formule gratuite
       return NextResponse.json({
         success: true,
         estimation_id: estimation.id,
@@ -152,16 +186,18 @@ export async function POST(request) {
           valeur_haute: resultat.valeur_haute,
           niveau_fiabilite: resultat.niveau_fiabilite
         },
+        no_pdf: true, // Indication explicite
         download_token: downloadToken
       })
     }
     
-    // Formule payante : nécessite paiement
+    // Formule payante : nécessite paiement avant génération PDF
     return NextResponse.json({
       success: true,
       estimation_id: estimation.id,
       formule: formule,
-      requires_payment: true
+      requires_payment: true,
+      prix: configFormule.prix
     })
     
   } catch (error) {
