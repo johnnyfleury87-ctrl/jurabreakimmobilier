@@ -411,3 +411,54 @@
 .versionCreate button:hover {
   background-color: #0052a3;
 }
+
+/* Mode Test PDF */
+.testModeParam {
+  border: 2px solid #ff6b00;
+  background: #fff3e0;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.btnTest {
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #ff6b00 0%, #ff8800 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s;
+  box-shadow: 0 2px 4px rgba(255, 107, 0, 0.2);
+}
+
+.btnTest:hover:not(:disabled) {
+  background: linear-gradient(135deg, #ff8800 0%, #ff9900 100%);
+  box-shadow: 0 4px 8px rgba(255, 107, 0, 0.3);
+  transform: translateY(-1px);
+}
+
+.btnTest:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btnDownload {
+  padding: 0.5rem 1rem;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.btnDownload:hover:not(:disabled) {
+  background: #059669;
+}
+
+.btnDownload:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

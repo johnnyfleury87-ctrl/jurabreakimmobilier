@@ -4,9 +4,12 @@ import PDFDocument from 'pdfkit'
  * Génère un PDF d'estimation immobilière
  * @param {Object} estimation - Données de l'estimation depuis la DB
  * @param {string} formule - 'formule_1' ou 'formule_2'
+ * @param {Object} options - Options : { testMode: boolean }
  * @returns {Buffer} - Buffer du PDF généré
  */
-export async function generateEstimationPDF(estimation, formule) {
+export async function generateEstimationPDF(estimation, formule, options = {}) {
+  const { testMode = false } = options
+  
   return new Promise((resolve, reject) => {
     try {
       const doc = new PDFDocument({
@@ -21,6 +24,27 @@ export async function generateEstimationPDF(estimation, formule) {
         resolve(pdfBuffer)
       })
       doc.on('error', reject)
+
+      // ========== WATERMARK MODE TEST ==========
+      if (testMode) {
+        doc.save()
+        doc.rotate(45, { origin: [300, 400] })
+        doc.fontSize(60)
+           .fillColor('#ff0000', 0.15)
+           .text('MODE TEST', 100, 350, {
+             width: 400,
+             align: 'center'
+           })
+        doc.restore()
+        
+        // Bandeau rouge en haut
+        doc.rect(0, 0, 595, 30)
+           .fill('#ff0000')
+        
+        doc.fontSize(12)
+           .fillColor('#ffffff')
+           .text('⚠️ PDF GÉNÉRÉ EN MODE TEST - NE PAS UTILISER EN PRODUCTION', 50, 8, { align: 'center' })
+      }
 
       // ========== EN-TÊTE ==========
       doc.fontSize(24)

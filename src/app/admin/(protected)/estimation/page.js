@@ -24,6 +24,7 @@ export default function AdminEstimationPage() {
   const [marges, setMarges] = useState([])
   const [mentions, setMentions] = useState([])
   const [versions, setVersions] = useState([])
+  const [estimations, setEstimations] = useState([])
   
   const supabase = createClient()
   
@@ -100,6 +101,15 @@ export default function AdminEstimationPage() {
             .order('version_number', { ascending: false })
             .limit(20)
           setVersions(versionsData || [])
+          break
+          
+        case 'estimations':
+          const { data: estimationsData } = await supabase
+            .from('estimations')
+            .select('*, profiles(email, nom, prenom)')
+            .order('created_at', { ascending: false })
+            .limit(50)
+          setEstimations(estimationsData || [])
           break
       }
     } catch (error) {
@@ -282,6 +292,12 @@ export default function AdminEstimationPage() {
           ⚙️ Paramètres Globaux
         </button>
         <button
+          className={activeTab === 'estimations' ? styles.active : ''}
+          onClick={() => setActiveTab('estimations')}
+        >
+          📄 Estimations (Test PDF)
+        </button>
+        <button
           className={activeTab === 'communes' ? styles.active : ''}
           onClick={() => setActiveTab('communes')}
         >
@@ -338,6 +354,13 @@ export default function AdminEstimationPage() {
                 onUpdateFormule={handleUpdateConfigFormule}
               />
             )}
+            {activeTab === 'estimations' && (
+              <EstimationsTab 
+                estimations={estimations} 
+                onReload={loadData}
+                setMessage={setMessage}
+              />
+            )}
             {activeTab === 'zones' && (
               <ZonesTab zones={zones} onSave={handleSaveZone} />
             )}
@@ -382,22 +405,33 @@ function ParametresTab({ parametresGlobaux, configFormules, onUpdateParametre, o
         </p>
         
         <div className={styles.parametresList}>
-          {parametresGlobaux.map(param => (
-            <div key={param.cle} className={styles.parametreItem}>
-              <div className={styles.parametreInfo}>
-                <h4>{param.cle.replace(/_/g, ' ').toUpperCase()}</h4>
-                <p>{param.description}</p>
+          {parametresGlobaux.map(param => {
+            const isTestMode = param.cle === 'mode_test_pdf_admin'
+            return (
+              <div key={param.cle} className={`${styles.parametreItem} ${isTestMode ? styles.testModeParam : ''}`}>
+                <div className={styles.parametreInfo}>
+                  <h4>
+                    {isTestMode && '🧪 '}
+                    {param.cle.replace(/_/g, ' ').toUpperCase()}
+                  </h4>
+                  <p>{param.description}</p>
+                  {isTestMode && (
+                    <div className={styles.warning} style={{ marginTop: '0.5rem' }}>
+                      ⚠️ Mode réservé aux admins. Permet de générer des PDFs test même pour formule gratuite.
+                    </div>
+                  )}
+                </div>
+                <label className={styles.switch}>
+                  <input
+                    type="checkbox"
+                    checked={param.valeur === true}
+                    onChange={(e) => onUpdateParametre(param.cle, e.target.checked)}
+                  />
+                  <span className={styles.slider}></span>
+                </label>
               </div>
-              <label className={styles.switch}>
-                <input
-                  type="checkbox"
-                  checked={param.valeur}
-                  onChange={(e) => onUpdateParametre(param.cle, e.target.checked)}
-                />
-                <span className={styles.slider}></span>
-              </label>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
       
@@ -677,6 +711,164 @@ function VersionsTab({ versions, onCreate }) {
           ))}
         </tbody>
       </table>
+    </div>
+  )
+}
+
+// =====================================================================
+// COMPOSANT : ESTIMATIONS (avec génération PDF test)
+// =====================================================================
+
+function EstimationsTab({ estimations, onReload, setMessage }) {
+  const [generatingPDF, setGeneratingPDF] = useState(null)
+  const [downloadingPDF, setDownloadingPDF] = useState(null)
+  const supabase = createClient()
+
+  async function handleGeneratePDFTest(estimationId) {
+    setGeneratingPDF(estimationId)
+    try {
+      const response = await fetch(`/api/admin/estimation/${estimationId}/generate-pdf-test`, {
+        method: 'POST'
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Erreur génération PDF')
+      }
+
+      setMessage({ 
+        type: 'success', 
+        text: `✅ ${result.message} - ${result.warning}` 
+      })
+      
+      // Recharger la liste
+      onReload()
+    } catch (error) {
+      setMessage({ type: 'error', text: error.message })
+    } finally {
+      setGeneratingPDF(null)
+    }
+  }
+
+  async function handleDownloadPDF(estimation) {
+    if (!estimation.pdf_path) {
+      setMessage({ type: 'error', text: 'Aucun PDF généré pour cette estimation' })
+      return
+    }
+
+    setDownloadingPDF(estimation.id)
+    try {
+      const { data, error } = await supabase.storage
+        .from('estimations')
+        .download(estimation.pdf_path)
+
+      if (error) throw error
+
+      // Créer un lien de téléchargement
+      const url = URL.createObjectURL(data)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `estimation_${estimation.id}.pdf`
+      a.click()
+      URL.revokeObjectURL(url)
+
+      setMessage({ type: 'success', text: 'PDF téléchargé' })
+    } catch (error) {
+      setMessage({ type: 'error', text: error.message })
+    } finally {
+      setDownloadingPDF(null)
+    }
+  }
+
+  function getFormuleBadge(formule) {
+    const badges = {
+      gratuite: { text: '🟢 Gratuite', color: '#10b981' },
+      standard: { text: '🔵 Standard', color: '#3b82f6' },
+      premium: { text: '⭐ Premium', color: '#8b5cf6' }
+    }
+    const badge = badges[formule] || badges.gratuite
+    return <span style={{ color: badge.color, fontWeight: 'bold' }}>{badge.text}</span>
+  }
+
+  function getPDFModeBadge(mode) {
+    if (mode === 'test') {
+      return <span style={{ background: '#ff0000', color: 'white', padding: '2px 6px', borderRadius: '3px', fontSize: '0.8em' }}>TEST</span>
+    }
+    return <span style={{ background: '#10b981', color: 'white', padding: '2px 6px', borderRadius: '3px', fontSize: '0.8em' }}>PROD</span>
+  }
+
+  return (
+    <div>
+      <h2>📄 Estimations - Génération PDF Test</h2>
+      <p className={styles.helpText}>
+        🧪 <strong>Mode Test PDF Admin :</strong> Générez des PDFs test pour valider le rendu sans paiement. 
+        Les PDFs test sont marqués clairement et ne doivent pas être utilisés en production.
+      </p>
+
+      {estimations.length === 0 ? (
+        <p>Aucune estimation trouvée</p>
+      ) : (
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Client</th>
+              <th>Formule</th>
+              <th>PDF</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {estimations.map(est => (
+              <tr key={est.id}>
+                <td>#{est.id.slice(0, 8)}</td>
+                <td>
+                  {est.profiles?.nom} {est.profiles?.prenom}
+                  <br />
+                  <small>{est.profiles?.email}</small>
+                </td>
+                <td>{getFormuleBadge(est.formule)}</td>
+                <td>
+                  {est.pdf_path ? (
+                    <div>
+                      ✅ Généré {getPDFModeBadge(est.pdf_mode)}
+                      <br />
+                      <small>{new Date(est.pdf_generated_at).toLocaleString()}</small>
+                    </div>
+                  ) : (
+                    <span style={{ color: '#999' }}>❌ Aucun PDF</span>
+                  )}
+                </td>
+                <td>
+                  <small>{new Date(est.created_at).toLocaleString()}</small>
+                </td>
+                <td>
+                  <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
+                    <button
+                      onClick={() => handleGeneratePDFTest(est.id)}
+                      disabled={generatingPDF === est.id}
+                      className={styles.btnTest}
+                    >
+                      {generatingPDF === est.id ? '⏳ Génération...' : '🧪 Générer PDF (test)'}
+                    </button>
+                    {est.pdf_path && (
+                      <button
+                        onClick={() => handleDownloadPDF(est)}
+                        disabled={downloadingPDF === est.id}
+                        className={styles.btnDownload}
+                      >
+                        {downloadingPDF === est.id ? '⏳...' : '📥 Télécharger'}
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   )
 }
