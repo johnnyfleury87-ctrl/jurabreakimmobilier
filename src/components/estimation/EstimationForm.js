@@ -304,7 +304,12 @@ export default function EstimationForm() {
             formData={formData}
             setFormData={setFormData}
             communes={communes}
-          onLoadCommunes={loadCommunesByCodePostal}
+            onLoadCommunes={loadCommunesByCodePostal}
+          />
+        )}
+        
+        {/* ÉTAPE 4 : OPTIONS */}
+        {currentStep === 4 && (
           <Step4Options
             formData={formData}
             setFormData={setFormData}
