@@ -5,10 +5,12 @@
  * ÉTAPES :
  * 1. Inscription / Connexion (obligatoire)
  * 2. Choix du motif
- * 3. Données du bien
- * 4. Choix de la formule (NOUVEAU PLACEMENT)
- * 5. Consentement légal (connaissant la formule)
- * 6. Options / Plus-values (uniquement si premium)
+ * 3. Choix de la formule ⬅️ PLACEMENT CLÉ
+ * 4. Données du bien (adaptées à la formule choisie)
+ * 5. Consentement légal
+ * 6. Résultat / Paiement / PDF
+ * 
+ * RÈGLE MÉTIER : La formule (étape 3) pilote les champs de l'étape 4
  */
 
 'use client'
@@ -188,28 +190,27 @@ export default function EstimationForm() {
       case 2:
         return formData.motif !== '' && (formData.motif !== 'autre' || formData.motif_autre_detail !== '')
       case 3:
-        return (
-          formData.type_bien &&
-          formData.surface_habitable &&
-          formData.commune_nom &&
-          formData.code_postal &&
-          formData.etat_bien
-        )
+        return formData.formule !== '' // Formule AVANT données du bien
       case 4:
-        return formData.formule !== '' // Formule obligatoire
-      case 5:
-        return formData.consentement_accepte // Consentement après formule
-      case 6:
-        // Si premium, champs supplémentaires requis
-        if (formData.formule === 'premium') {
-          return (
-            formData.nb_pieces &&
-            formData.nb_chambres &&
-            formData.environnement &&
-            formData.travaux
-          )
+        // Validation adaptée à la formule choisie
+        const baseFields = formData.type_bien && formData.surface_habitable && formData.commune_nom && formData.code_postal && formData.etat_bien
+        
+        if (formData.formule === 'gratuite') {
+          // Gratuite : champs minimaux uniquement
+          return baseFields
+        } else if (formData.formule === 'standard') {
+          // Standard : + année construction + surface terrain
+          return baseFields && formData.annee_construction && formData.surface_terrain
+        } else if (formData.formule === 'premium') {
+          // Premium : tous les champs
+          return baseFields && formData.annee_construction && formData.surface_terrain && 
+                 formData.nb_pieces && formData.nb_chambres && formData.environnement && formData.travaux
         }
-        return true // Options facultatives pour autres formules
+        return baseFields
+      case 5:
+        return formData.consentement_accepte
+      case 6:
+        return true // Étape finale : validation côté backend
       default:
         return true
     }
@@ -229,20 +230,24 @@ export default function EstimationForm() {
           setError('Veuillez sélectionner un motif d\'estimation')
           break
         case 3:
-          setError('Veuillez remplir tous les champs obligatoires du bien')
+          setError('⚠️ Vous devez choisir une formule pour continuer')
           break
         case 4:
-          setError('⚠️ Vous devez choisir une formule pour continuer')
+          if (formData.formule === 'gratuite') {
+            setError('Veuillez remplir les champs de base du bien')
+          } else if (formData.formule === 'standard') {
+            setError('Formule Standard : année de construction et surface terrain requises')
+          } else if (formData.formule === 'premium') {
+            setError('⭐ Formule Premium : tous les champs sont obligatoires')
+          } else {
+            setError('Veuillez remplir tous les champs obligatoires du bien')
+          }
           break
         case 5:
           setError('Vous devez accepter les conditions légales')
           break
         case 6:
-          if (formData.formule === 'premium') {
-            setError('⭐ Formule Premium : tous les champs supplémentaires sont obligatoires')
-          } else {
-            setError('Veuillez compléter les champs requis')
-          }
+          setError('Vérifiez tous les champs requis')
           break
         default:
           setError('Veuillez remplir tous les champs obligatoires')
@@ -339,21 +344,21 @@ export default function EstimationForm() {
           />
         )}
         
-        {/* ÉTAPE 3 : DONNÉES DU BIEN */}
+        {/* ÉTAPE 3 : CHOIX DE LA FORMULE */}
         {currentStep === 3 && (
-          <Step3Bien
+          <Step3Formule
+            formData={formData}
+            setFormData={setFormData}
+          />
+        )}
+        
+        {/* ÉTAPE 4 : DONNÉES DU BIEN (adaptées à la formule) */}
+        {currentStep === 4 && (
+          <Step4Bien
             formData={formData}
             setFormData={setFormData}
             communes={communes}
             onLoadCommunes={loadCommunesByCodePostal}
-          />
-        )}
-        
-        {/* ÉTAPE 4 : CHOIX DE LA FORMULE */}
-        {currentStep === 4 && (
-          <Step4Formule
-            formData={formData}
-            setFormData={setFormData}
           />
         )}
         
@@ -365,9 +370,9 @@ export default function EstimationForm() {
           />
         )}
         
-        {/* ÉTAPE 6 : OPTIONS / CHAMPS PREMIUM */}
+        {/* ÉTAPE 6 : RÉSULTAT / PAIEMENT */}
         {currentStep === 6 && (
-          <Step6OptionsEtPremium
+          <Step6Resultat
             formData={formData}
             setFormData={setFormData}
             options={options}
@@ -521,10 +526,32 @@ function Step2Motif({ formData, setFormData }) {
   )
 }
 
-function Step3Bien({ formData, setFormData, communes, onLoadCommunes }) {
+function Step4Bien({ formData, setFormData, communes, onLoadCommunes }) {
+  // Déterminer les champs à afficher selon la formule
+  const isGratuite = formData.formule === 'gratuite'
+  const isStandard = formData.formule === 'standard'
+  const isPremium = formData.formule === 'premium'
+  
   return (
     <div className={styles.step}>
-      <h2>Étape 3 : Données du bien</h2>
+      <h2>Étape 4 : Données du bien</h2>
+      
+      {/* Infobox formule choisie */}
+      {isGratuite && (
+        <div className={styles.infoBox} style={{ background: '#d1fae5', borderColor: '#10b981' }}>
+          🟢 <strong>Formule Gratuite :</strong> Champs de base uniquement
+        </div>
+      )}
+      {isStandard && (
+        <div className={styles.infoBox} style={{ background: '#dbeafe', borderColor: '#3b82f6' }}>
+          🔵 <strong>Formule Standard :</strong> Année de construction et surface terrain requises
+        </div>
+      )}
+      {isPremium && (
+        <div className={styles.infoBox} style={{ background: '#ede9fe', borderColor: '#8b5cf6' }}>
+          ⭐ <strong>Formule Premium :</strong> Tous les champs sont obligatoires
+        </div>
+      )}
       
       <label>Type de bien *</label>
       <select
@@ -546,12 +573,13 @@ function Step3Bien({ formData, setFormData, communes, onLoadCommunes }) {
         required
       />
       
-      <label>Surface terrain (m²)</label>
+      <label>Surface terrain (m²) {!isGratuite && '*'}</label>
       <input
         type="number"
         step="0.01"
         value={formData.surface_terrain}
         onChange={e => setFormData({ ...formData, surface_terrain: e.target.value })}
+        required={!isGratuite}
       />
       
       <label>Code postal *</label>
@@ -597,13 +625,14 @@ function Step3Bien({ formData, setFormData, communes, onLoadCommunes }) {
         ))}
       </select>
       
-      <label>Année de construction</label>
+      <label>Année de construction {!isGratuite && '*'}</label>
       <input
         type="number"
         value={formData.annee_construction}
         onChange={e => setFormData({ ...formData, annee_construction: e.target.value })}
         min="1800"
         max={new Date().getFullYear()}
+        required={!isGratuite}
       />
       
       <label>État du bien *</label>
@@ -617,11 +646,62 @@ function Step3Bien({ formData, setFormData, communes, onLoadCommunes }) {
         <option value="bon">Bon</option>
         <option value="tres_bon">Très bon / Récent</option>
       </select>
+      
+      {/* CHAMPS PREMIUM UNIQUEMENT */}
+      {isPremium && (
+        <>
+          <hr style={{ margin: '2rem 0', borderColor: '#8b5cf6' }} />
+          <h3 style={{ color: '#8b5cf6' }}>⭐ Champs Premium (obligatoires)</h3>
+          
+          <label>Nombre de pièces *</label>
+          <input
+            type="number"
+            value={formData.nb_pieces}
+            onChange={e => setFormData({ ...formData, nb_pieces: e.target.value })}
+            min="1"
+            required
+          />
+          
+          <label>Nombre de chambres *</label>
+          <input
+            type="number"
+            value={formData.nb_chambres}
+            onChange={e => setFormData({ ...formData, nb_chambres: e.target.value })}
+            min="0"
+            required
+          />
+          
+          <label>Environnement *</label>
+          <select
+            value={formData.environnement}
+            onChange={e => setFormData({ ...formData, environnement: e.target.value })}
+            required
+          >
+            <option value="">-- Sélectionnez --</option>
+            <option value="ville">Ville</option>
+            <option value="campagne">Campagne</option>
+            <option value="montagne">Montagne</option>
+          </select>
+          
+          <label>État des travaux *</label>
+          <select
+            value={formData.travaux}
+            onChange={e => setFormData({ ...formData, travaux: e.target.value })}
+            required
+          >
+            <option value="">-- Sélectionnez --</option>
+            <option value="aucun">Aucun travaux nécessaire</option>
+            <option value="leger">Travaux légers (peinture, sols...)</option>
+            <option value="moyen">Rénovation partielle</option>
+            <option value="complet">Rénovation complète (-5 ans)</option>
+          </select>
+        </>
+      )}
     </div>
   )
 }
 
-function Step4Formule({ formData, setFormData }) {
+function Step3Formule({ formData, setFormData }) {
   const formules = [
     {
       value: 'gratuite',
@@ -666,8 +746,8 @@ function Step4Formule({ formData, setFormData }) {
   
   return (
     <div className={styles.step}>
-      <h2>Étape 4 : Choisissez votre formule</h2>
-      <p>Sélectionnez le niveau de service souhaité</p>
+      <h2>Étape 3 : Choisissez votre formule</h2>
+      <p>⚠️ <strong>Ce choix détermine les champs requis à l'étape suivante</strong></p>
       
       {!formData.formule && (
         <div className={styles.infoBox}>
@@ -760,7 +840,7 @@ function Step5Consentement({ formData, setFormData }) {
   )
 }
 
-function Step6OptionsEtPremium({ formData, setFormData, options }) {
+function Step6Resultat({ formData, setFormData, options }) {
   function toggleOption(code) {
     const selected = formData.options_selectionnees || []
     if (selected.includes(code)) {
@@ -776,83 +856,43 @@ function Step6OptionsEtPremium({ formData, setFormData, options }) {
     }
   }
   
+  const formulesInfo = {
+    gratuite: { nom: 'Gratuite', emoji: '🟢', color: '#10b981' },
+    standard: { nom: 'Standard (49€)', emoji: '🔵', color: '#3b82f6' },
+    premium: { nom: 'Premium (149€)', emoji: '⭐', color: '#8b5cf6' }
+  }
+  
+  const formuleChoisie = formulesInfo[formData.formule] || formulesInfo.gratuite
+  
   return (
     <div className={styles.step}>
-      <h2>Étape 6 : Informations complémentaires</h2>
+      <h2>Étape 6 : Récapitulatif et validation</h2>
+      
+      {/* Récap formule */}
+      <div className={styles.formuleRecap} style={{ borderColor: formuleChoisie.color }}>
+        <strong>{formuleChoisie.emoji} Formule choisie :</strong> {formuleChoisie.nom}
+      </div>
       
       {/* MESSAGE SELON LA FORMULE */}
       {formData.formule === 'gratuite' && (
-        <div className={styles.infoBox}>
-          🟢 <strong>Formule Gratuite :</strong> Les champs ci-dessous sont tous facultatifs.
+        <div className={styles.infoBox} style={{ background: '#d1fae5', borderColor: '#10b981' }}>
+          🟢 <strong>Formule Gratuite :</strong> Résultat affiché à l'écran uniquement, pas de PDF généré.
         </div>
       )}
       
       {formData.formule === 'standard' && (
-        <div className={styles.infoBox}>
-          🔵 <strong>Formule Standard :</strong> Complétez les options pour affiner votre estimation.
+        <div className={styles.infoBox} style={{ background: '#dbeafe', borderColor: '#3b82f6' }}>
+          🔵 <strong>Formule Standard :</strong> PDF généré après paiement de 49€.
         </div>
       )}
       
-      {/* CHAMPS OBLIGATOIRES POUR PREMIUM */}
       {formData.formule === 'premium' && (
-        <>
-          <div className={styles.infoBox} style={{ backgroundColor: '#f3f0ff', borderColor: '#8b5cf6', color: '#5b21b6' }}>
-            ⭐ <strong>Formule Premium :</strong> Les champs suivants sont <strong>obligatoires</strong> pour cette formule.
-          </div>
-          
-          <div className={styles.premiumFields}>
-          <h3 style={{ color: '#8b5cf6' }}>⭐ Champs requis pour la formule Premium</h3>
-          
-          <label>Nombre de pièces *</label>
-          <input
-            type="number"
-            placeholder="Nombre de pièces"
-            value={formData.nb_pieces}
-            onChange={e => setFormData({ ...formData, nb_pieces: e.target.value })}
-            min="1"
-            required
-          />
-          
-          <label>Nombre de chambres *</label>
-          <input
-            type="number"
-            placeholder="Nombre de chambres"
-            value={formData.nb_chambres}
-            onChange={e => setFormData({ ...formData, nb_chambres: e.target.value })}
-            min="0"
-            required
-          />
-          
-          <label>Environnement *</label>
-          <select
-            value={formData.environnement}
-            onChange={e => setFormData({ ...formData, environnement: e.target.value })}
-            required
-          >
-            <option value="">Sélectionner...</option>
-            <option value="centre_ville">Centre-ville</option>
-            <option value="periurbain">Périurbain</option>
-            <option value="rural">Rural</option>
-            <option value="montagne">Montagne</option>
-          </select>
-          
-          <label>Travaux récents *</label>
-          <select
-            value={formData.travaux}
-            onChange={e => setFormData({ ...formData, travaux: e.target.value })}
-            required
-          >
-            <option value="">Sélectionner...</option>
-            <option value="aucun">Aucun</option>
-            <option value="mineurs">Travaux mineurs (-5 ans)</option>
-            <option value="majeurs">Rénovation majeure (-5 ans)</option>
-            <option value="complet">Rénovation complète (-5 ans)</option>
-          </select>
+        <div className={styles.infoBox} style={{ background: '#ede9fe', borderColor: '#8b5cf6' }}>
+          ⭐ <strong>Formule Premium :</strong> PDF détaillé après paiement de 149€.
         </div>
-        </>
       )}
       
-      {/* OPTIONS FACULTATIVES POUR TOUTES LES FORMULES */}
+      {/* OPTIONS FACULTATIVES */}
       <div className={styles.optionsSection}>
         <h3>Options / Plus-values (facultatif)</h3>
         <p>Sélectionnez les éléments présents pour affiner l'estimation</p>
