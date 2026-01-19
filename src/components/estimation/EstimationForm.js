@@ -220,7 +220,33 @@ export default function EstimationForm() {
       setCurrentStep(prev => Math.min(prev + 1, 6))
       setError(null)
     } else {
-      setError('Veuillez remplir tous les champs obligatoires')
+      // Messages d'erreur spécifiques par étape
+      switch (currentStep) {
+        case 1:
+          setError('Vous devez créer un compte ou vous connecter')
+          break
+        case 2:
+          setError('Veuillez sélectionner un motif d\'estimation')
+          break
+        case 3:
+          setError('Veuillez remplir tous les champs obligatoires du bien')
+          break
+        case 4:
+          setError('⚠️ Vous devez choisir une formule pour continuer')
+          break
+        case 5:
+          setError('Vous devez accepter les conditions légales')
+          break
+        case 6:
+          if (formData.formule === 'premium') {
+            setError('⭐ Formule Premium : tous les champs supplémentaires sont obligatoires')
+          } else {
+            setError('Veuillez compléter les champs requis')
+          }
+          break
+        default:
+          setError('Veuillez remplir tous les champs obligatoires')
+      }
     }
   }
   
@@ -643,6 +669,12 @@ function Step4Formule({ formData, setFormData }) {
       <h2>Étape 4 : Choisissez votre formule</h2>
       <p>Sélectionnez le niveau de service souhaité</p>
       
+      {!formData.formule && (
+        <div className={styles.infoBox}>
+          ℹ️ <strong>Important :</strong> Votre choix déterminera les services disponibles et les champs requis pour la suite du parcours.
+        </div>
+      )}
+      
       <div className={styles.formules}>
         {formules.map(formule => (
           <div
@@ -683,9 +715,25 @@ function Step5Consentement({ formData, setFormData }) {
   
   const mention = mentions[formData.motif] || mentions.curiosite
   
+  // Infos formule pour récapitulatif
+  const formulesInfo = {
+    gratuite: { nom: 'Gratuite', emoji: '🟢', info: 'Résultat affiché à l\'écran uniquement' },
+    standard: { nom: 'Standard (49€)', emoji: '🔵', info: 'PDF généré et téléchargeable' },
+    premium: { nom: 'Premium (149€)', emoji: '⭐', info: 'PDF + champs détaillés obligatoires' }
+  }
+  
+  const formuleChoisie = formulesInfo[formData.formule] || formulesInfo.gratuite
+  
   return (
     <div className={styles.step}>
       <h2>Étape 5 : Consentement légal</h2>
+      
+      {/* Récapitulatif formule */}
+      <div className={styles.formuleRecap}>
+        <strong>{formuleChoisie.emoji} Formule choisie :</strong> {formuleChoisie.nom}
+        <br />
+        <small>{formuleChoisie.info}</small>
+      </div>
       
       <div className={styles.legalNotice}>
         <h3>Information importante</h3>
@@ -732,9 +780,27 @@ function Step6OptionsEtPremium({ formData, setFormData, options }) {
     <div className={styles.step}>
       <h2>Étape 6 : Informations complémentaires</h2>
       
+      {/* MESSAGE SELON LA FORMULE */}
+      {formData.formule === 'gratuite' && (
+        <div className={styles.infoBox}>
+          🟢 <strong>Formule Gratuite :</strong> Les champs ci-dessous sont tous facultatifs.
+        </div>
+      )}
+      
+      {formData.formule === 'standard' && (
+        <div className={styles.infoBox}>
+          🔵 <strong>Formule Standard :</strong> Complétez les options pour affiner votre estimation.
+        </div>
+      )}
+      
       {/* CHAMPS OBLIGATOIRES POUR PREMIUM */}
       {formData.formule === 'premium' && (
-        <div className={styles.premiumFields}>
+        <>
+          <div className={styles.infoBox} style={{ backgroundColor: '#f3f0ff', borderColor: '#8b5cf6', color: '#5b21b6' }}>
+            ⭐ <strong>Formule Premium :</strong> Les champs suivants sont <strong>obligatoires</strong> pour cette formule.
+          </div>
+          
+          <div className={styles.premiumFields}>
           <h3 style={{ color: '#8b5cf6' }}>⭐ Champs requis pour la formule Premium</h3>
           
           <label>Nombre de pièces *</label>
@@ -783,6 +849,7 @@ function Step6OptionsEtPremium({ formData, setFormData, options }) {
             <option value="complet">Rénovation complète (-5 ans)</option>
           </select>
         </div>
+        </>
       )}
       
       {/* OPTIONS FACULTATIVES POUR TOUTES LES FORMULES */}
