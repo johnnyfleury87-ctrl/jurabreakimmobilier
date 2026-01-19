@@ -4,7 +4,7 @@
   margin: 0 auto;
 }
 
-h1 {
+.title {
   margin-bottom: 2rem;
   color: var(--color-text-primary, #1a1a1a);
 }
@@ -61,7 +61,7 @@ h1 {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.content h2 {
+.subtitle {
   margin-bottom: 1.5rem;
   color: var(--color-text-primary, #1a1a1a);
 }
@@ -127,7 +127,7 @@ h1 {
   overflow-y: auto;
 }
 
-.modalContent h3 {
+.modalTitle {
   margin-bottom: 1.5rem;
 }
 

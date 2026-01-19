@@ -1,0 +1,81 @@
+
+> jurabreak-immobilier@1.0.0 build
+> next build
+
+  ▲ Next.js 14.2.35
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (131kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+
+./src/app/admin/(protected)/annonces/[id]/edit/page.js
+32:6  Warning: React Hook useEffect has a missing dependency: 'fetchAnnonce'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+46:6  Warning: React Hook useEffect has a missing dependency: 'formData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+59:6  Warning: React Hook useEffect has a missing dependency: 'formData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/admin/(protected)/estimation/page.js
+31:6  Warning: React Hook useEffect has a missing dependency: 'loadData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/admin/login/page.js
+44:6  Warning: React Hook useEffect has a missing dependency: 'devBypass'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/annonces/page.js
+37:6  Warning: React Hook useEffect has a missing dependency: 'applyFilters'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/components/estimation/EstimationForm.js
+73:6  Warning: React Hook useEffect has missing dependencies: 'checkAuth', 'loadCommunes', and 'loadOptions'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/basic-features/eslint#disabling-rules
+   Collecting page data ...
+   Generating static pages (0/19) ...
+   Generating static pages (4/19) 
+   Generating static pages (9/19) 
+   Generating static pages (14/19) 
+ ✓ Generating static pages (19/19)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                    Size     First Load JS
+┌ ƒ /                                          1.9 kB          103 kB
+├ ○ /_not-found                                873 B          88.3 kB
+├ ƒ /a-propos                                  1.12 kB         102 kB
+├ ƒ /admin                                     494 B          96.6 kB
+├ ƒ /admin/annonces                            3.12 kB         104 kB
+├ ƒ /admin/annonces/[id]/edit                  5.71 kB        98.3 kB
+├ ƒ /admin/annonces/new                        5.35 kB        92.8 kB
+├ ƒ /admin/estimation                          2.81 kB         144 kB
+├ ○ /admin/login                               2.19 kB         143 kB
+├ ƒ /admin/logout                              0 B                0 B
+├ ○ /annonces                                  7.09 kB         108 kB
+├ ƒ /annonces/[slug]                           619 B          93.2 kB
+├ ƒ /api/admin/annonces                        0 B                0 B
+├ ƒ /api/admin/annonces/[id]                   0 B                0 B
+├ ƒ /api/admin/annonces/[id]/photos            0 B                0 B
+├ ƒ /api/admin/annonces/[id]/photos/[photoId]  0 B                0 B
+├ ƒ /api/admin/estimation/create-version       0 B                0 B
+├ ƒ /api/annonces                              0 B                0 B
+├ ƒ /api/auth/login                            0 B                0 B
+├ ƒ /api/contact                               0 B                0 B
+├ ƒ /api/estimation                            0 B                0 B
+├ ƒ /api/estimation/[id]/download              0 B                0 B
+├ ƒ /api/webhooks/stripe                       0 B                0 B
+├ ƒ /auth/callback                             0 B                0 B
+├ ○ /contact                                   3.17 kB        99.3 kB
+├ ○ /estimation                                6.1 kB          156 kB
+├ ƒ /estimation/resultat/[id]                  477 B          96.6 kB
+├ ƒ /evenements                                1.13 kB         102 kB
+├ ○ /honoraires                                1.9 kB          103 kB
+└ ○ /mentions-legales                          316 B          87.7 kB
++ First Load JS shared by all                  87.4 kB
+  ├ chunks/117-a7f94d143874c344.js             31.7 kB
+  ├ chunks/fd9d1056-1aae0987937804d3.js        53.6 kB
+  └ other shared chunks (total)                2.04 kB
+
+
+ƒ Middleware                                   73.5 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

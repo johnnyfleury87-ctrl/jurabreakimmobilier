@@ -208,7 +208,7 @@ export default function AdminEstimationPage() {
   
   return (
     <div className={styles.container}>
-      <h1>Paramétrage Estimation</h1>
+      <h1 className={styles.title}>Paramétrage Estimation</h1>
       
       {message && (
         <div className={`${styles.message} ${styles[message.type]}`}>
@@ -303,7 +303,7 @@ function ZonesTab({ zones, onSave }) {
   
   return (
     <div>
-      <h2>Zones géographiques</h2>
+      <h2 className={styles.subtitle}>Zones géographiques</h2>
       <button onClick={() => setEditingZone({ nom: '', description: '', prix_m2_reference: '', actif: true })}>
         + Nouvelle zone
       </button>
@@ -346,7 +346,7 @@ function ZoneForm({ zone, onSave, onCancel }) {
   return (
     <div className={styles.modal}>
       <div className={styles.modalContent}>
-        <h3>{zone.id ? 'Modifier' : 'Nouvelle'} Zone</h3>
+        <h3 className={styles.modalTitle}>{zone.id ? 'Modifier' : 'Nouvelle'} Zone</h3>
         <input
           type="text"
           placeholder="Nom"

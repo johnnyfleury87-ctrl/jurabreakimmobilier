@@ -99,7 +99,7 @@ CREATE TABLE IF NOT EXISTS estimation_mentions_legales (
   texte_long TEXT NOT NULL,
   actif BOOLEAN NOT NULL DEFAULT true,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  created_by UUID REFERENCES auth.users(id),
+  created_by UUID,
   UNIQUE(motif, version)
 );
 
@@ -116,7 +116,7 @@ CREATE TABLE IF NOT EXISTS estimation_versions_regles (
   description TEXT,
   snapshot JSONB NOT NULL, -- Snapshot complet de tous les paramètres
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  created_by UUID REFERENCES auth.users(id)
+  created_by UUID
 );
 
 CREATE INDEX idx_versions_created_at ON estimation_versions_regles(created_at DESC);
@@ -137,7 +137,7 @@ CREATE TABLE estimations (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   
   -- Compte utilisateur (obligatoire)
-  user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  user_id UUID,
   
   -- Informations client
   nom TEXT NOT NULL,
