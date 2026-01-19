@@ -115,7 +115,7 @@ VALUES
   ('Moirans-en-Montagne', '39260', '00000000-0000-0000-0001-000000000005', 1750, true),
   ('Arinthod', '39240', '00000000-0000-0000-0001-000000000005', 1650, true),
   ('Le Frasnois', '39300', '00000000-0000-0000-0001-000000000005', 1750, true),
-  ('Syam', '39300', '39000000-0000-0000-0001-000000000005', 1700, true),
+  ('Syam', '39300', '00000000-0000-0000-0001-000000000005', 1700, true),
   ('Bourg-de-Sirod', '39300', '00000000-0000-0000-0001-000000000005', 1700, true),
   ('Les Planches-en-Montagne', '39300', '00000000-0000-0000-0001-000000000005', 1650, true),
   ('Pont-de-Poitte', '39270', '00000000-0000-0000-0001-000000000005', 1650, true),
@@ -125,8 +125,9 @@ VALUES
   ('Val-Sonnette', '39270', '00000000-0000-0000-0001-000000000005', 1650, true),
   ('Billecul', '39300', '00000000-0000-0000-0001-000000000005', 1650, true),
   ('Monnet-la-Ville', '39300', '00000000-0000-0000-0001-000000000005', 1650, true)
-ON CONFLICT (nom, code_postal) DO UPDATE
+ON CONFLICT (nom) DO UPDATE
 SET 
+  code_postal = EXCLUDED.code_postal,
   zone_id = EXCLUDED.zone_id,
   prix_m2_reference = EXCLUDED.prix_m2_reference,
   actif = EXCLUDED.actif;
