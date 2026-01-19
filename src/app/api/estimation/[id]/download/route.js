@@ -1,78 +1,94 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { generateEstimationPDF } from '@/lib/estimation/pdfGenerator'
 
-// Force dynamic rendering car on utilise cookies
 export const dynamic = 'force-dynamic'
-export const revalidate = 0
 
+/**
+ * API GET /api/estimation/[id]/download?token=xxx
+ * Téléchargement sécurisé du PDF conforme à docs/estimation.md
+ */
 export async function GET(request, { params }) {
-  const { id } = params
-  const { searchParams } = new URL(request.url)
-  const token = searchParams.get('token')
-  
-  // Vérifier que le token est fourni
-  if (!token) {
-    return NextResponse.json(
-      { error: 'Token de téléchargement manquant' },
-      { status: 400 }
-    )
+  try {
+    const { id } = params
+    const { searchParams } = new URL(request.url)
+    const token = searchParams.get('token')
+    
+    if (!token) {
+      return NextResponse.json({ error: 'Token requis' }, { status: 400 })
+    }
+    
+    const supabase = await createClient()
+    
+    // Vérifier l'estimation et le token
+    const { data: estimation, error } = await supabase
+      .from('estimations')
+      .select('*')
+      .eq('id', id)
+      .eq('download_token', token)
+      .single()
+    
+    if (error || !estimation) {
+      return NextResponse.json({ error: 'Introuvable ou token invalide' }, { status: 404 })
+    }
+    
+    // Si PDF déjà généré, le récupérer
+    if (estimation.pdf_path) {
+      const { data: pdfData, error: storageError } = await supabase
+        .storage
+        .from('estimations')
+        .download(estimation.pdf_path)
+      
+      if (!storageError && pdfData) {
+        const buffer = await pdfData.arrayBuffer()
+        return new NextResponse(buffer, {
+          headers: {
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': `attachment; filename="estimation_${id.substring(0, 8)}.pdf"`,
+            'Cache-Control': 'no-cache'
+          }
+        })
+      }
+    }
+    
+    // Sinon, générer le PDF
+    const { data: mentionLegale } = await supabase
+      .from('estimation_mentions_legales')
+      .select('*')
+      .eq('motif', estimation.motif)
+      .eq('actif', true)
+      .order('version', { ascending: false })
+      .limit(1)
+      .single()
+    
+    const pdfBuffer = await generateEstimationPDF(estimation, mentionLegale)
+    
+    // Stocker le PDF
+    const fileName = `${id}/estimation_${Date.now()}.pdf`
+    
+    await supabase.storage.from('estimations').upload(fileName, pdfBuffer, {
+      contentType: 'application/pdf',
+      upsert: false
+    })
+    
+    await supabase
+      .from('estimations')
+      .update({
+        pdf_path: fileName,
+        pdf_generated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+    
+    return new NextResponse(pdfBuffer, {
+      headers: {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="estimation_${id.substring(0, 8)}.pdf"`,
+        'Cache-Control': 'no-cache'
+      }
+    })
+    
+  } catch (error) {
+    console.error('Erreur téléchargement PDF:', error)
+    return NextResponse.json({ error: 'Erreur génération PDF' }, { status: 500 })
   }
-  
-  const supabase = createClient()
-  
-  // Vérifier que l'estimation existe et que le token correspond
-  const { data: estimation, error } = await supabase
-    .from('estimations')
-    .select('id, email, pdf_path, statut, download_token')
-    .eq('id', id)
-    .single()
-  
-  if (error || !estimation) {
-    return NextResponse.json(
-      { error: 'Estimation introuvable' },
-      { status: 404 }
-    )
-  }
-  
-  // Vérifier que le token correspond
-  if (estimation.download_token !== token) {
-    return NextResponse.json(
-      { error: 'Token de téléchargement invalide' },
-      { status: 403 }
-    )
-  }
-  
-  // Vérifier que le PDF existe
-  if (!estimation.pdf_path) {
-    return NextResponse.json(
-      { error: 'PDF non disponible' },
-      { status: 404 }
-    )
-  }
-  
-  // Vérifier que l'estimation est payée
-  if (estimation.statut !== 'PAID' && estimation.statut !== 'COMPLETED') {
-    return NextResponse.json(
-      { error: 'PDF non disponible pour cette estimation' },
-      { status: 403 }
-    )
-  }
-  
-  // Générer URL signée valide 5 minutes (accès temporaire)
-  const adminSupabase = createAdminClient()
-  const { data: urlData, error: urlError } = await adminSupabase.storage
-    .from('estimations')
-    .createSignedUrl(estimation.pdf_path, 300) // 5 minutes
-  
-  if (urlError || !urlData?.signedUrl) {
-    console.error('Error generating signed URL:', urlError)
-    return NextResponse.json(
-      { error: 'Erreur lors de la génération du lien de téléchargement' },
-      { status: 500 }
-    )
-  }
-  
-  // Rediriger vers l'URL signée temporaire
-  return NextResponse.redirect(urlData.signedUrl)
 }

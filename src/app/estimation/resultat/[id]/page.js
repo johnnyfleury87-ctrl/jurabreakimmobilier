@@ -1,12 +1,15 @@
+/**
+ * Page Résultat d'estimation - Conforme à docs/estimation.md
+ */
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import styles from './page.module.css'
 
 export default async function ResultatEstimationPage({ params }) {
   const { id } = params
-  const supabase = createClient()
+  const supabase = await createClient()
   
-  // Récupérer l'estimation
   const { data: estimation, error } = await supabase
     .from('estimations')
     .select('*')
@@ -17,109 +20,65 @@ export default async function ResultatEstimationPage({ params }) {
     redirect('/estimation')
   }
   
-  // Extraire les données d'estimation
-  const estimationData = estimation.estimation_data || {}
-  const { estimation_basse, estimation_haute, estimation_moyenne } = estimationData
-  
   return (
-    <div className={styles.resultat}>
-      <div className="container">
-        <h1>Votre Estimation</h1>
-        
-        <div className={styles.card}>
-          <div className={styles.header}>
-            <h2>Résultat de l'estimation</h2>
-            <span className={styles.formule}>
-              {estimation.formule === 'formule_0' ? 'Formule Gratuite' : 
-               estimation.formule === 'formule_1' ? 'Formule Standard' : 
-               'Formule Premium'}
-            </span>
-          </div>
-          
-          <div className={styles.bienInfo}>
-            <h3>Informations du bien</h3>
-            <p><strong>Adresse :</strong> {estimation.adresse_bien}</p>
-            <p><strong>Type :</strong> {formatTypeBien(estimation.type_bien)}</p>
-            <p><strong>Surface :</strong> {estimation.surface} m²</p>
-            {estimation.nb_pieces && <p><strong>Nombre de pièces :</strong> {estimation.nb_pieces}</p>}
-          </div>
-          
-          {estimation_moyenne && (
-            <div className={styles.estimation}>
-              <h3>Estimation de valeur</h3>
-              <div className={styles.fourchette}>
-                <div className={styles.range}>
-                  <span className={styles.label}>Fourchette :</span>
-                  <span className={styles.value}>
-                    {formatPrice(estimation_basse)} - {formatPrice(estimation_haute)}
-                  </span>
-                </div>
-                <div className={styles.moyenne}>
-                  <span className={styles.label}>Valeur moyenne estimée :</span>
-                  <span className={styles.valuePrimary}>{formatPrice(estimation_moyenne)}</span>
-                </div>
-              </div>
-            </div>
-          )}
-          
-          {estimation.pdf_path && estimation.download_token && (
-            <div className={styles.pdfSection}>
-              <h3>Rapport PDF</h3>
-              <p>Votre rapport d'estimation détaillé est disponible :</p>
-              <a 
-                href={`/api/estimation/${id}/download?token=${estimation.download_token}`}
-                className={styles.pdfButton}
-              >
-                📄 Télécharger le rapport PDF
-              </a>
-              <p className={styles.pdfNote}>
-                ⚠️ Ce lien est unique et sécurisé. Ne le partagez pas.
-              </p>
-            </div>
-          )}
-          
-          {estimation.formule === 'formule_0' && (
-            <div className={styles.disclaimer}>
-              <p><strong>Important :</strong> Cette estimation est purement indicative et automatique. 
-              Elle n'a aucune valeur juridique et ne remplace pas une expertise professionnelle.</p>
-              <p>Pour une estimation plus précise avec visite sur place et valeur juridique, 
-              découvrez nos <a href="/estimation">formules payantes</a>.</p>
-            </div>
-          )}
-          
-          {estimation.formule === 'formule_2' && estimation.statut === 'PAID' && (
-            <div className={styles.nextSteps}>
-              <h3>Prochaines étapes</h3>
-              <p>Nous allons vous contacter dans les plus brefs délais pour organiser la visite sur place.</p>
-              <p>Un email de confirmation vous a été envoyé à : <strong>{estimation.email}</strong></p>
-            </div>
-          )}
-          
-          <div className={styles.contact}>
-            <p>Des questions ? Contactez-nous :</p>
-            <p>📧 contact@jurabreak.fr | 📞 06 XX XX XX XX</p>
-          </div>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h1>Votre Estimation Immobilière</h1>
+        <p className={styles.reference}>Référence : EST-{id.substring(0, 8).toUpperCase()}</p>
+      </div>
+      
+      {/* RÉSULTAT - FOURCHETTE OBLIGATOIRE */}
+      <section className={styles.resultatCard}>
+        <h2>Fourchette d'estimation</h2>
+        <div className={styles.valeurs}>
+          <span className={styles.valeurBasse}>{formatPrice(estimation.valeur_basse)}</span>
+          <span className={styles.separator}>—</span>
+          <span className={styles.valeurHaute}>{formatPrice(estimation.valeur_haute)}</span>
         </div>
+        <div className={styles.mediane}>
+          Valeur médiane : <strong>{formatPrice(estimation.valeur_mediane)}</strong>
+        </div>
+        <p className={styles.niveau}>Niveau : {formatNiveauFiabilite(estimation.niveau_fiabilite)}</p>
+      </section>
+      
+      {/* BIEN */}
+      <section className={styles.section}>
+        <h2>Votre bien</h2>
+        <p><strong>{estimation.commune_nom}</strong> • {estimation.surface_habitable} m² • {formatEtatBien(estimation.etat_bien)}</p>
+      </section>
+      
+      {/* PDF */}
+      {estimation.download_token && (
+        <section className={styles.pdfSection}>
+          <a href={`/api/estimation/${id}/download?token=${estimation.download_token}`} className={styles.downloadBtn}>
+            📄 Télécharger le rapport PDF
+          </a>
+          <p className={styles.note}>Lien unique et sécurisé</p>
+        </section>
+      )}
+      
+      {/* DISCLAIMER */}
+      <div className={styles.disclaimer}>
+        <p><strong>⚠️ Cette estimation est indicative</strong> et n'a aucune valeur juridique opposable.</p>
+      </div>
+      
+      <div className={styles.actions}>
+        <Link href="/estimation" className={styles.btn}>Nouvelle estimation</Link>
       </div>
     </div>
   )
 }
 
-function formatTypeBien(type) {
-  const types = {
-    'maison': 'Maison',
-    'appartement': 'Appartement',
-    'terrain': 'Terrain',
-    'local_commercial': 'Local commercial',
-    'autre': 'Autre'
-  }
-  return types[type] || type
+function formatPrice(value) {
+  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(value)
 }
 
-function formatPrice(price) {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'EUR',
-    minimumFractionDigits: 0
-  }).format(price)
+function formatEtatBien(etat) {
+  const etats = { 'a_renover': 'À rénover', 'correct': 'Correct', 'bon': 'Bon', 'tres_bon': 'Très bon' }
+  return etats[etat] || etat
+}
+
+function formatNiveauFiabilite(niveau) {
+  const niveaux = { 'minimal': 'MINIMAL', 'complet': 'COMPLET', 'tres_complet': 'TRÈS COMPLET' }
+  return niveaux[niveau] || niveau
 }

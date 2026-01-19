@@ -1,47 +1,127 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import Stripe from 'stripe'
+import { calculerEstimation, getReglesCalcul } from '@/lib/estimation/calculator'
+import crypto from 'crypto'
 
-// Force dynamic rendering car on utilise cookies
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
-
+/**
+ * API POST /api/estimation
+ * Conforme à docs/estimation.md
+ */
 export async function POST(request) {
   try {
     const supabase = await createClient()
-    const data = await request.json()
+    const body = await request.json()
     
-    // Validation
-    if (!data.nom || !data.prenom || !data.email || !data.adresse_bien || !data.type_bien || !data.surface || !data.formule) {
+    // =====================================================================
+    // VALIDATION - Étape 1 : User ID obligatoire
+    // =====================================================================
+    if (!body.user_id) {
       return NextResponse.json(
-        { error: 'Champs requis manquants' },
+        { error: 'Authentification requise. Vous devez créer un compte.' },
+        { status: 401 }
+      )
+    }
+    
+    // =====================================================================
+    // VALIDATION - Étape 2 : Motif obligatoire
+    // =====================================================================
+    const motifsValides = ['curiosite', 'vente', 'divorce', 'succession', 'notaire', 'autre']
+    if (!body.motif || !motifsValides.includes(body.motif)) {
+      return NextResponse.json(
+        { error: 'Motif d\'estimation requis' },
         { status: 400 }
       )
     }
     
-    // Créer l'estimation en DB
-    const insertData = {
-      formule: data.formule,
-      nom: data.nom,
-      prenom: data.prenom,
-      email: data.email,
-      telephone: data.telephone || null,
-      adresse_bien: data.adresse_bien,
-      type_bien: data.type_bien,
-      surface: parseFloat(data.surface),
-      nb_pieces: data.nb_pieces ? parseInt(data.nb_pieces) : null,
-      annee_construction: data.annee_construction ? parseInt(data.annee_construction) : null,
-      etat_general: data.etat_general || null,
-      travaux: data.travaux || null,
-      environnement: data.environnement || null,
-      statut: 'DRAFT'
+    if (body.motif === 'autre' && !body.motif_autre_detail) {
+      return NextResponse.json(
+        { error: 'Précision requise pour le motif "Autre"' },
+        { status: 400 }
+      )
     }
     
-    // Ajouter terms_accepted_at pour formules payantes si CGV acceptées
-    if ((data.formule === 'formule_1' || data.formule === 'formule_2') && data.termsAccepted) {
-      insertData.terms_accepted_at = new Date().toISOString()
+    // =====================================================================
+    // VALIDATION - Étape 3 : Données du bien
+    // =====================================================================
+    if (!body.type_bien || !body.surface_habitable || !body.commune_nom || !body.code_postal || !body.etat_bien) {
+      return NextResponse.json(
+        { error: 'Données du bien incomplètes' },
+        { status: 400 }
+      )
+    }
+    
+    // =====================================================================
+    // VALIDATION - Étape 5 : Consentement légal obligatoire
+    // =====================================================================
+    if (!body.consentement_accepte) {
+      return NextResponse.json(
+        { error: 'Vous devez accepter les conditions légales' },
+        { status: 400 }
+      )
+    }
+    
+    // Récupérer IP pour traçabilité
+    const forwarded = request.headers.get('x-forwarded-for')
+    const ip = forwarded ? forwarded.split(',')[0] : request.headers.get('x-real-ip') || 'unknown'
+    
+    // =====================================================================
+    // CALCUL DE L'ESTIMATION (côté serveur)
+    // =====================================================================
+    const regles = await getReglesCalcul(supabase)
+    
+    const inputs = {
+      surface_habitable: parseFloat(body.surface_habitable),
+      surface_terrain: body.surface_terrain ? parseFloat(body.surface_terrain) : null,
+      type_bien: body.type_bien,
+      etat_bien: body.etat_bien,
+      commune_id: body.commune_id || null,
+      annee_construction: body.annee_construction ? parseInt(body.annee_construction) : null,
+      options_selectionnees: body.options_selectionnees || []
+    }
+    
+    const resultat = calculerEstimation(inputs, regles)
+    
+    // =====================================================================
+    // CRÉATION EN BASE
+    // =====================================================================
+    const formule = body.formule || 'gratuite'
+    const downloadToken = crypto.randomBytes(32).toString('hex')
+    
+    const insertData = {
+      user_id: body.user_id,
+      nom: body.nom || '',
+      prenom: body.prenom || '',
+      email: body.email || '',
+      telephone: body.telephone || null,
+      motif: body.motif,
+      motif_autre_detail: body.motif === 'autre' ? body.motif_autre_detail : null,
+      type_bien: body.type_bien,
+      surface_habitable: parseFloat(body.surface_habitable),
+      surface_terrain: body.surface_terrain ? parseFloat(body.surface_terrain) : null,
+      commune_id: body.commune_id || null,
+      commune_nom: body.commune_nom,
+      code_postal: body.code_postal,
+      annee_construction: body.annee_construction ? parseInt(body.annee_construction) : null,
+      etat_bien: body.etat_bien,
+      options_selectionnees: JSON.stringify(body.options_selectionnees || []),
+      consentement_accepte: true,
+      consentement_ip: ip,
+      consentement_at: new Date().toISOString(),
+      formule: formule,
+      statut_paiement: formule === 'gratuite' ? 'PAID' : 'PENDING',
+      paiement_at: formule === 'gratuite' ? new Date().toISOString() : null,
+      calcul_inputs: inputs,
+      calcul_detail: resultat.detail,
+      valeur_basse: resultat.valeur_basse,
+      valeur_mediane: resultat.valeur_mediane,
+      valeur_haute: resultat.valeur_haute,
+      niveau_fiabilite: resultat.niveau_fiabilite,
+      calcule_at: new Date().toISOString(),
+      download_token: downloadToken,
+      statut: formule === 'gratuite' ? 'CALCULATED' : 'DRAFT'
     }
     
     const { data: estimation, error: dbError } = await supabase
@@ -51,92 +131,86 @@ export async function POST(request) {
       .single()
     
     if (dbError) {
-      console.error('Error creating estimation:', dbError)
+      console.error('Erreur création estimation:', dbError)
       return NextResponse.json(
         { error: 'Erreur lors de la création de l\'estimation' },
         { status: 500 }
       )
     }
     
-    // Si formule gratuite, générer estimation automatique et retourner
-    if (data.formule === 'formule_0') {
-      // Calcul automatique simplifié (prix au m² estimé)
-      const prixM2Moyen = 2400 // Prix moyen au m² dans le Jura (à ajuster selon secteur)
-      const surface = parseFloat(data.surface)
-      const estimationBasse = Math.round(surface * prixM2Moyen * 0.85)
-      const estimationHaute = Math.round(surface * prixM2Moyen * 1.15)
-      const estimationMoyenne = Math.round((estimationBasse + estimationHaute) / 2)
-      
-      // Stocker les données d'estimation
-      const estimationData = {
-        prix_m2: prixM2Moyen,
-        estimation_basse: estimationBasse,
-        estimation_haute: estimationHaute,
-        estimation_moyenne: estimationMoyenne,
-        calculated_at: new Date().toISOString()
-      }
-      
-      // Mettre à jour l'estimation avec les résultats
-      await supabase
-        .from('estimations')
-        .update({
-          estimation_data: estimationData,
-          statut: 'COMPLETED'
-        })
-        .eq('id', estimation.id)
-      
+    // =====================================================================
+    // RETOUR
+    // =====================================================================
+    if (formule === 'gratuite') {
       return NextResponse.json({
-        id: estimation.id,
-        formule: 'formule_0'
+        success: true,
+        estimation_id: estimation.id,
+        formule: 'gratuite',
+        resultat: {
+          valeur_basse: resultat.valeur_basse,
+          valeur_mediane: resultat.valeur_mediane,
+          valeur_haute: resultat.valeur_haute,
+          niveau_fiabilite: resultat.niveau_fiabilite
+        },
+        download_token: downloadToken
       })
     }
     
-    // Si formule payante, créer Stripe Checkout Session
-    const priceId = data.formule === 'formule_1' 
-      ? process.env.STRIPE_PRICE_ID_FORMULE1
-      : process.env.STRIPE_PRICE_ID_FORMULE2
+    // Formule payante : nécessite paiement
+    return NextResponse.json({
+      success: true,
+      estimation_id: estimation.id,
+      formule: formule,
+      requires_payment: true
+    })
     
-    if (!priceId) {
+  } catch (error) {
+    console.error('Erreur API estimation:', error)
+    return NextResponse.json(
+      { error: error.message || 'Erreur serveur' },
+      { status: 500 }
+    )
+  }
+}
+
+/**
+ * API GET /api/estimation?user_id=xxx
+ * Historique des estimations
+ */
+export async function GET(request) {
+  try {
+    const supabase = await createClient()
+    const { searchParams } = new URL(request.url)
+    const userId = searchParams.get('user_id')
+    
+    if (!userId) {
       return NextResponse.json(
-        { error: 'Configuration Stripe manquante' },
+        { error: 'user_id requis' },
+        { status: 400 }
+      )
+    }
+    
+    const { data: estimations, error } = await supabase
+      .from('estimations')
+      .select('id, motif, commune_nom, surface_habitable, valeur_mediane, statut, created_at')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+    
+    if (error) {
+      console.error('Erreur récupération estimations:', error)
+      return NextResponse.json(
+        { error: 'Erreur récupération' },
         { status: 500 }
       )
     }
     
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
-      mode: 'payment',
-      success_url: `${process.env.BASE_URL}/estimation/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.BASE_URL}/estimation?cancelled=true`,
-      client_reference_id: estimation.id,
-      customer_email: data.email,
-      metadata: {
-        estimation_id: estimation.id,
-        formule: data.formule
-      }
-    })
-    
-    // Mettre à jour l'estimation avec le session ID
-    await supabase
-      .from('estimations')
-      .update({ 
-        stripe_checkout_session_id: session.id 
-      })
-      .eq('id', estimation.id)
-    
     return NextResponse.json({
-      id: estimation.id,
-      checkoutUrl: session.url
+      success: true,
+      estimations
     })
     
   } catch (error) {
-    console.error('Error in estimation API:', error)
+    console.error('Erreur API estimation GET:', error)
     return NextResponse.json(
       { error: 'Erreur serveur' },
       { status: 500 }
