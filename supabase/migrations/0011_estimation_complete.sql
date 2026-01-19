@@ -319,7 +319,7 @@ INSERT INTO estimation_marges (niveau_fiabilite, marge_basse, marge_haute, descr
 ON CONFLICT (niveau_fiabilite) DO NOTHING;
 
 -- Mentions légales par motif (version 1)
-INSERT INTO estimation_mentions_legales (motif, version, texte_court, texte_long, actif) VALUES
+INSERT INTO estimation_mentions_legales (motif, version, texte_court, texte_long) VALUES
   ('curiosite', 1, 'Estimation indicative', 'Cette estimation est purement indicative et constitue une aide à la décision. Elle ne remplace pas une expertise professionnelle.'),
   ('vente', 1, 'Estimation indicative - Projet de vente', 'Cette estimation constitue un document préparatoire pour votre projet de vente. Elle ne remplace pas une expertise professionnelle.'),
   ('divorce', 1, 'Estimation indicative - Divorce/Séparation', 'Ce document ne constitue pas une expertise opposable devant une juridiction. Il s''agit d''une estimation indicative qui peut servir de base de discussion.'),
