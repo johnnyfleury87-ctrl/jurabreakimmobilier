@@ -104,12 +104,16 @@ export default function AdminEstimationPage() {
           break
           
         case 'estimations':
-          const { data: estimationsData } = await supabase
-            .from('estimations')
-            .select('*, profiles(email, nom, prenom)')
-            .order('created_at', { ascending: false })
-            .limit(50)
-          setEstimations(estimationsData || [])
+          // Utiliser endpoint admin avec service role pour contourner RLS
+          const responseEst = await fetch('/api/admin/estimation/list')
+          const dataEst = await responseEst.json()
+          
+          if (!responseEst.ok) {
+            throw new Error(dataEst.error || 'Erreur chargement estimations')
+          }
+          
+          console.log('[ADMIN UI] Estimations chargées:', dataEst.count)
+          setEstimations(dataEst.estimations || [])
           break
       }
     } catch (error) {
@@ -722,7 +726,35 @@ function VersionsTab({ versions, onCreate }) {
 function EstimationsTab({ estimations, onReload, setMessage }) {
   const [generatingPDF, setGeneratingPDF] = useState(null)
   const [downloadingPDF, setDownloadingPDF] = useState(null)
+  const [creatingTest, setCreatingTest] = useState(false)
   const supabase = createClient()
+
+  async function handleCreateTestEstimation() {
+    setCreatingTest(true)
+    try {
+      const response = await fetch('/api/admin/estimation/create-test', {
+        method: 'POST'
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Erreur création estimation test')
+      }
+
+      setMessage({ 
+        type: 'success', 
+        text: `✅ Estimation test créée : #${result.estimation_id.slice(0, 8)}` 
+      })
+      
+      // Recharger la liste
+      onReload()
+    } catch (error) {
+      setMessage({ type: 'error', text: error.message })
+    } finally {
+      setCreatingTest(false)
+    }
+  }
 
   async function handleGeneratePDFTest(estimationId) {
     setGeneratingPDF(estimationId)
@@ -807,7 +839,20 @@ function EstimationsTab({ estimations, onReload, setMessage }) {
       </p>
 
       {estimations.length === 0 ? (
-        <p>Aucune estimation trouvée</p>
+        <div style={{ textAlign: 'center', padding: '3rem' }}>
+          <p>Aucune estimation trouvée</p>
+          <p style={{ marginTop: '1rem', color: '#666' }}>
+            Créez une estimation de test pour tester la génération PDF
+          </p>
+          <button
+            onClick={handleCreateTestEstimation}
+            disabled={creatingTest}
+            className={styles.btnTest}
+            style={{ marginTop: '1.5rem' }}
+          >
+            {creatingTest ? '⏳ Création...' : '➕ Créer une estimation de test'}
+          </button>
+        </div>
       ) : (
         <table className={styles.table}>
           <thead>
