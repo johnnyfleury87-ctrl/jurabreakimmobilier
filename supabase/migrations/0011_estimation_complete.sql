@@ -26,13 +26,22 @@ CREATE TABLE IF NOT EXISTS estimation_zones (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Ajouter la contrainte de clé étrangère
-ALTER TABLE estimation_communes
-ADD CONSTRAINT fk_commune_zone 
-FOREIGN KEY (zone_id) REFERENCES estimation_zones(id) ON DELETE SET NULL;
+-- Ajouter la contrainte de clé étrangère (idempotent)
+DO $$ 
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint 
+    WHERE conname = 'fk_commune_zone' 
+    AND conrelid = 'estimation_communes'::regclass
+  ) THEN
+    ALTER TABLE estimation_communes
+    ADD CONSTRAINT fk_commune_zone 
+    FOREIGN KEY (zone_id) REFERENCES estimation_zones(id) ON DELETE SET NULL;
+  END IF;
+END $$;
 
-CREATE INDEX idx_communes_zone ON estimation_communes(zone_id);
-CREATE INDEX idx_communes_actif ON estimation_communes(actif);
+CREATE INDEX IF NOT EXISTS idx_communes_zone ON estimation_communes(zone_id);
+CREATE INDEX IF NOT EXISTS idx_communes_actif ON estimation_communes(actif);
 
 -- =====================================================================
 -- 2. TABLE COEFFICIENTS
@@ -51,8 +60,8 @@ CREATE TABLE IF NOT EXISTS estimation_coefficients (
   UNIQUE(categorie, code)
 );
 
-CREATE INDEX idx_coefficients_categorie ON estimation_coefficients(categorie);
-CREATE INDEX idx_coefficients_actif ON estimation_coefficients(actif);
+CREATE INDEX IF NOT EXISTS idx_coefficients_categorie ON estimation_coefficients(categorie);
+CREATE INDEX IF NOT EXISTS idx_coefficients_actif ON estimation_coefficients(actif);
 
 -- =====================================================================
 -- 3. TABLE OPTIONS / PLUS-VALUES
@@ -71,7 +80,7 @@ CREATE TABLE IF NOT EXISTS estimation_options (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_options_actif ON estimation_options(actif);
+CREATE INDEX IF NOT EXISTS idx_options_actif ON estimation_options(actif);
 
 -- =====================================================================
 -- 4. TABLE MARGES FOURCHETTE (par niveau de fiabilité)
@@ -103,8 +112,8 @@ CREATE TABLE IF NOT EXISTS estimation_mentions_legales (
   UNIQUE(motif, version)
 );
 
-CREATE INDEX idx_mentions_motif ON estimation_mentions_legales(motif);
-CREATE INDEX idx_mentions_actif ON estimation_mentions_legales(actif);
+CREATE INDEX IF NOT EXISTS idx_mentions_motif ON estimation_mentions_legales(motif);
+CREATE INDEX IF NOT EXISTS idx_mentions_actif ON estimation_mentions_legales(actif);
 
 -- =====================================================================
 -- 6. TABLE VERSION RÈGLES (versioning des paramètres)
@@ -119,17 +128,17 @@ CREATE TABLE IF NOT EXISTS estimation_versions_regles (
   created_by UUID
 );
 
-CREATE INDEX idx_versions_created_at ON estimation_versions_regles(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_versions_created_at ON estimation_versions_regles(created_at DESC);
 
 -- =====================================================================
 -- 7. REFONTE TABLE ESTIMATIONS (selon spécifications)
 -- =====================================================================
 
--- Backup de l'ancienne table
+-- Renommer l'ancienne table en estimations_legacy
 DO $$ 
 BEGIN
-  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'estimations') THEN
-    ALTER TABLE estimations RENAME TO estimations_old;
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'estimations') THEN
+    ALTER TABLE estimations RENAME TO estimations_legacy;
   END IF;
 END $$;
 
@@ -199,15 +208,15 @@ CREATE TABLE estimations (
   completed_at TIMESTAMPTZ
 );
 
--- Index
-CREATE INDEX idx_estimations_user_id ON estimations(user_id);
-CREATE INDEX idx_estimations_email ON estimations(email);
-CREATE INDEX idx_estimations_statut ON estimations(statut);
-CREATE INDEX idx_estimations_motif ON estimations(motif);
-CREATE INDEX idx_estimations_commune ON estimations(commune_id);
-CREATE INDEX idx_estimations_version_regles ON estimations(version_regles_id);
-CREATE INDEX idx_estimations_created_at ON estimations(created_at DESC);
-CREATE INDEX idx_estimations_download_token ON estimations(download_token) WHERE download_token IS NOT NULL;
+-- Index (idempotents)
+CREATE INDEX IF NOT EXISTS idx_estimations_user_id ON estimations(user_id);
+CREATE INDEX IF NOT EXISTS idx_estimations_email ON estimations(email);
+CREATE INDEX IF NOT EXISTS idx_estimations_statut ON estimations(statut);
+CREATE INDEX IF NOT EXISTS idx_estimations_motif ON estimations(motif);
+CREATE INDEX IF NOT EXISTS idx_estimations_commune ON estimations(commune_id);
+CREATE INDEX IF NOT EXISTS idx_estimations_version_regles ON estimations(version_regles_id);
+CREATE INDEX IF NOT EXISTS idx_estimations_created_at ON estimations(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_estimations_download_token ON estimations(download_token) WHERE download_token IS NOT NULL;
 
 -- =====================================================================
 -- 8. TRIGGERS
@@ -221,36 +230,44 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Supprimer les triggers existants avant de les créer (idempotent)
+DROP TRIGGER IF EXISTS set_estimations_updated_at ON estimations;
 CREATE TRIGGER set_estimations_updated_at
   BEFORE UPDATE ON estimations
   FOR EACH ROW
   EXECUTE FUNCTION update_estimation_updated_at();
 
+DROP TRIGGER IF EXISTS set_communes_updated_at ON estimation_communes;
 CREATE TRIGGER set_communes_updated_at
   BEFORE UPDATE ON estimation_communes
   FOR EACH ROW
   EXECUTE FUNCTION update_estimation_updated_at();
 
+DROP TRIGGER IF EXISTS set_zones_updated_at ON estimation_zones;
 CREATE TRIGGER set_zones_updated_at
   BEFORE UPDATE ON estimation_zones
   FOR EACH ROW
   EXECUTE FUNCTION update_estimation_updated_at();
 
+DROP TRIGGER IF EXISTS set_coefficients_updated_at ON estimation_coefficients;
 CREATE TRIGGER set_coefficients_updated_at
   BEFORE UPDATE ON estimation_coefficients
   FOR EACH ROW
   EXECUTE FUNCTION update_estimation_updated_at();
 
+DROP TRIGGER IF EXISTS set_options_updated_at ON estimation_options;
 CREATE TRIGGER set_options_updated_at
   BEFORE UPDATE ON estimation_options
   FOR EACH ROW
   EXECUTE FUNCTION update_estimation_updated_at();
 
+DROP TRIGGER IF EXISTS set_marges_updated_at ON estimation_marges;
 CREATE TRIGGER set_marges_updated_at
   BEFORE UPDATE ON estimation_marges
   FOR EACH ROW
   EXECUTE FUNCTION update_estimation_updated_at();
 
+DROP TRIGGER IF EXISTS set_mentions_updated_at ON estimation_mentions_legales;
 CREATE TRIGGER set_mentions_updated_at
   BEFORE UPDATE ON estimation_mentions_legales
   FOR EACH ROW
@@ -311,22 +328,23 @@ INSERT INTO estimation_mentions_legales (motif, version, texte_court, texte_long
   ('autre', 1, 'Estimation indicative', 'Cette estimation est purement indicative et constitue une aide à la décision. Elle ne remplace pas une expertise professionnelle.')
 ON CONFLICT (motif, version) DO NOTHING;
 
--- Créer la première version des règles
+-- Créer la première version des règles (snapshot JSONB correct)
 INSERT INTO estimation_versions_regles (version_number, description, snapshot, created_at)
 VALUES (
   1,
   'Version initiale des règles d''estimation',
-  '{
-    "created_at": "' || NOW() || '",
-    "description": "Paramètres initiaux du module d''estimation",
-    "zones": [],
-    "communes": [],
-    "coefficients": [],
-    "options": [],
-    "marges": []
-  }'::jsonb,
+  jsonb_build_object(
+    'created_at', NOW(),
+    'description', 'Paramètres initiaux du module d''estimation',
+    'zones', '[]'::jsonb,
+    'communes', '[]'::jsonb,
+    'coefficients', '[]'::jsonb,
+    'options', '[]'::jsonb,
+    'marges', '[]'::jsonb
+  ),
   NOW()
-);
+)
+ON CONFLICT (version_number) DO NOTHING;
 
 -- =====================================================================
 -- 10. STORAGE BUCKET pour PDFs
