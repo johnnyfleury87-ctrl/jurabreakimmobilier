@@ -69,7 +69,6 @@ export default function EstimationForm() {
   useEffect(() => {
     checkAuth()
     loadOptions()
-    loadCommunes()
   }, [])
   
   async function checkAuth() {
@@ -85,14 +84,34 @@ export default function EstimationForm() {
     }
   }
   
-  async function loadCommunes() {
-    const { data } = await supabase
-      .from('estimation_communes')
-      .select('id, nom, code_postal')
-      .eq('actif', true)
-      .order('nom')
+  // Charger communes selon code postal
+  async function loadCommunesByCodePostal(codePostal) {
+    if (!codePostal || codePostal.length !== 5) {
+      setCommunes([])
+      return
+    }
     
-    setCommunes(data || [])
+    try {
+      const response = await fetch(`/api/estimation/communes?code_postal=${codePostal}`)
+      const data = await response.json()
+      
+      if (data.success) {
+        setCommunes(data.communes || [])
+        
+        // Si une seule commune, la sélectionner automatiquement
+        if (data.communes.length === 1) {
+          const commune = data.communes[0]
+          setFormData(prev => ({
+            ...prev,
+            commune_id: commune.id,
+            commune_nom: commune.nom
+          }))
+        }
+      }
+    } catch (error) {
+      console.error('Erreur chargement communes:', error)
+      setCommunes([])
+    }
   }
   
   async function loadOptions() {
@@ -285,11 +304,7 @@ export default function EstimationForm() {
             formData={formData}
             setFormData={setFormData}
             communes={communes}
-          />
-        )}
-        
-        {/* ÉTAPE 4 : OPTIONS */}
-        {currentStep === 4 && (
+          onLoadCommunes={loadCommunesByCodePostal}
           <Step4Options
             formData={formData}
             setFormData={setFormData}
@@ -460,7 +475,7 @@ function Step2Motif({ formData, setFormData }) {
   )
 }
 
-function Step3Bien({ formData, setFormData, communes }) {
+function Step3Bien({ formData, setFormData, communes, onLoadCommunes }) {
   return (
     <div className={styles.step}>
       <h2>Étape 3 : Données du bien</h2>
@@ -493,6 +508,23 @@ function Step3Bien({ formData, setFormData, communes }) {
         onChange={e => setFormData({ ...formData, surface_terrain: e.target.value })}
       />
       
+      <label>Code postal *</label>
+      <input
+        type="text"
+        pattern="[0-9]{5}"
+        maxLength="5"
+        placeholder="39000"
+        value={formData.code_postal}
+        onChange={e => {
+          const cp = e.target.value
+          setFormData({ ...formData, code_postal: cp, commune_id: '', commune_nom: '' })
+          if (cp.length === 5) {
+            onLoadCommunes(cp)
+          }
+        }}
+        required
+      />
+      
       <label>Commune *</label>
       <select
         value={formData.commune_id}
@@ -501,15 +533,21 @@ function Step3Bien({ formData, setFormData, communes }) {
           setFormData({
             ...formData,
             commune_id: e.target.value,
-            commune_nom: commune?.nom || '',
-            code_postal: commune?.code_postal || ''
+            commune_nom: commune?.nom || ''
           })
         }}
+        disabled={!formData.code_postal || communes.length === 0}
         required
       >
-        <option value="">Sélectionnez une commune</option>
+        <option value="">
+          {!formData.code_postal 
+            ? 'Saisissez d\'abord le code postal' 
+            : communes.length === 0 
+            ? 'Aucune commune trouvée'
+            : 'Sélectionnez une commune'}
+        </option>
         {communes.map(c => (
-          <option key={c.id} value={c.id}>{c.nom} ({c.code_postal})</option>
+          <option key={c.id} value={c.id}>{c.nom}</option>
         ))}
       </select>
       

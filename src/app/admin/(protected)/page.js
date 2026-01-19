@@ -45,6 +45,7 @@ export default async function AdminDashboard() {
           <ul className={styles.menu}>
             <li><Link href="/admin" className={styles.active}>📊 Dashboard</Link></li>
             <li><Link href="/admin/annonces">🏠 Annonces</Link></li>
+            <li><Link href="/admin/estimation">📐 Estimation</Link></li>
           </ul>
           <div className={styles.sidebarFooter}>
             <p className={styles.userInfo}>

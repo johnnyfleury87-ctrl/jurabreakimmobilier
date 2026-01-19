@@ -1,0 +1,224 @@
+code_postal,commune,zone,prix_m2,is_active
+39000,Lons-le-Saunier,Centre,2200,true
+39100,Dole,Nord,2100,true
+39200,Saint-Claude,Haut-Jura,1800,true
+39300,Champagnole,Petite Montagne,1900,true
+39800,Poligny,Vignoble,2000,true
+39600,Arbois,Vignoble,2150,true
+39400,Morez,Haut-Jura,1700,true
+39270,Orgelet,Petite Montagne,1650,true
+39260,Moirans-en-Montagne,Petite Montagne,1750,true
+39500,Tavaux,Nord,1850,true
+39700,Rochefort-sur-Nenon,Nord,1900,true
+39220,Les Rousses,Haut-Jura,2500,true
+39150,Saint-Laurent-en-Grandvaux,Haut-Jura,1800,true
+39310,Septmoncel,Haut-Jura,1750,true
+39360,Chassal-Molinges,Haut-Jura,1650,true
+39570,Conliège,Centre,1950,true
+39570,Crançot,Centre,1900,true
+39570,L'Étoile,Vignoble,2000,true
+39570,Montmorot,Centre,2050,true
+39570,Perrigny,Centre,2100,true
+39016,Lons-le-Saunier Cedex,Centre,2200,true
+39100,Authume,Nord,1800,true
+39100,Brevans,Nord,1750,true
+39100,Choisey,Nord,1900,true
+39100,Damparis,Nord,1950,true
+39100,Falletans,Nord,1700,true
+39100,Foucherans,Nord,1850,true
+39100,Gatey,Nord,1650,true
+39100,Gevry,Nord,1700,true
+39100,Jouhe,Nord,1750,true
+39100,Malange,Nord,1650,true
+39100,Parcey,Nord,1800,true
+39100,Rainans,Nord,1700,true
+39100,Sampans,Nord,1850,true
+39100,Villette-lès-Dole,Nord,1900,true
+39110,Aiglepierre,Vignoble,1850,true
+39110,Bracon,Vignoble,1750,true
+39110,Cernans,Vignoble,1700,true
+39110,Châtelneuf,Vignoble,1800,true
+39110,Fay-en-Montagne,Vignoble,1750,true
+39110,Fontenu,Vignoble,1700,true
+39110,Geruge,Vignoble,1650,true
+39110,La Chaux-du-Dombief,Vignoble,1700,true
+39110,Marigny,Vignoble,1750,true
+39110,Menétrux-en-Joux,Vignoble,1700,true
+39110,Ney,Vignoble,1650,true
+39110,Saint-Pierre,Vignoble,1700,true
+39110,Salins-les-Bains,Vignoble,1900,true
+39120,Balaiseaux,Centre,1650,true
+39120,Chaussin,Nord,1750,true
+39120,Neublans-Abergement,Nord,1700,true
+39120,Rahon,Nord,1650,true
+39130,Blye,Nord,1600,true
+39130,Clairvaux-les-Lacs,Vignoble,1850,true
+39130,Cogna,Vignoble,1700,true
+39130,Coteaux du Lizon,Vignoble,1650,true
+39130,Doucier,Vignoble,1750,true
+39140,Arlay,Vignoble,1800,true
+39140,Bletterans,Centre,1700,true
+39140,Commenailles,Centre,1650,true
+39140,Ruffey-sur-Seille,Centre,1650,true
+39140,Villevieux,Centre,1600,true
+39160,Chassey-le-Camp,Nord,1650,true
+39160,Saint-Amour,Nord,1750,true
+39170,Charchilla,Nord,1600,true
+39170,Lavans-lès-Saint-Claude,Haut-Jura,1700,true
+39170,Saint-Lupicin,Haut-Jura,1650,true
+39180,Chaux-des-Crotenay,Vignoble,1650,true
+39190,Augea,Vignoble,1600,true
+39190,Beaufort-Orbagna,Centre,1700,true
+39190,Bonnefontaine,Centre,1650,true
+39190,Cousance,Centre,1650,true
+39190,Maynal,Centre,1600,true
+39190,Orbagna,Centre,1650,true
+39190,Publy,Centre,1600,true
+39190,Rotalier,Centre,1650,true
+39190,Saint-Didier,Centre,1600,true
+39190,Sainte-Agnès,Centre,1650,true
+39190,Sellières,Centre,1700,true
+39210,Andelot-Morval,Vignoble,1600,true
+39210,Château-Chalon,Vignoble,2100,true
+39210,Domblans,Centre,1700,true
+39210,Le Vernois,Vignoble,1750,true
+39210,Menétru-le-Vignoble,Vignoble,1800,true
+39210,Nevy-sur-Seille,Vignoble,1700,true
+39210,Plasne,Vignoble,1650,true
+39210,Voiteur,Vignoble,1750,true
+39230,Mantry,Centre,1650,true
+39230,Passenans,Centre,1700,true
+39230,Sellières,Centre,1700,true
+39240,Arinthod,Petite Montagne,1650,true
+39240,Cernon,Petite Montagne,1600,true
+39240,Chavéria,Petite Montagne,1650,true
+39250,Mignovillard,Haut-Jura,1700,true
+39250,Mièges,Haut-Jura,1650,true
+39250,Nozeroy,Haut-Jura,1650,true
+39250,Rix,Haut-Jura,1600,true
+39260,La Tour-du-Meix,Petite Montagne,1650,true
+39260,Les Chalesmes,Petite Montagne,1600,true
+39260,Martigna,Petite Montagne,1650,true
+39270,Chambéria,Petite Montagne,1600,true
+39270,Charchilla,Petite Montagne,1600,true
+39270,La Chaumusse,Petite Montagne,1650,true
+39270,Maisod,Petite Montagne,1600,true
+39270,Martigna,Petite Montagne,1650,true
+39270,Plaisia,Petite Montagne,1600,true
+39270,Pont-de-Poitte,Petite Montagne,1650,true
+39270,Reithouse,Petite Montagne,1600,true
+39270,Sarrogna,Petite Montagne,1600,true
+39270,Val-Sonnette,Petite Montagne,1650,true
+39280,Les Trois-Châteaux,Petite Montagne,1600,true
+39290,Archelange,Centre,1600,true
+39290,Menotey,Centre,1650,true
+39290,Mesnay,Vignoble,1700,true
+39290,Mouchard,Centre,1700,true
+39290,Pagnoz,Vignoble,1650,true
+39290,Plainoiseau,Centre,1650,true
+39290,Thoissia,Centre,1600,true
+39300,Billecul,Petite Montagne,1650,true
+39300,Bourg-de-Sirod,Petite Montagne,1700,true
+39300,Chaux-des-Prés,Petite Montagne,1650,true
+39300,Équevillon,Petite Montagne,1600,true
+39300,Le Frasnois,Petite Montagne,1750,true
+39300,Les Planches-en-Montagne,Petite Montagne,1650,true
+39300,Loulle,Petite Montagne,1600,true
+39300,Monnet-la-Ville,Petite Montagne,1650,true
+39300,Ney,Petite Montagne,1600,true
+39300,Sirod,Petite Montagne,1650,true
+39300,Syam,Petite Montagne,1700,true
+39310,Lajoux,Haut-Jura,1750,true
+39310,Lamoura,Haut-Jura,2200,true
+39310,Les Molunes,Haut-Jura,1900,true
+39310,Septmoncel-les-Molunes,Haut-Jura,1950,true
+39320,Broissia,Vignoble,1650,true
+39320,Gigny-sur-Suran,Centre,1700,true
+39320,Loisia,Centre,1650,true
+39320,Saint-Julien,Centre,1600,true
+39330,La Chailleuse,Vignoble,1650,true
+39330,Mouchard,Centre,1700,true
+39330,Port-Lesney,Vignoble,1800,true
+39350,Belmont,Vignoble,1650,true
+39350,Censeau,Vignoble,1600,true
+39350,Cize,Vignoble,1650,true
+39360,Viry,Haut-Jura,1700,true
+39380,Abergement-le-Grand,Nord,1600,true
+39380,Abergement-le-Petit,Nord,1600,true
+39380,Mont-sous-Vaudrey,Nord,1700,true
+39380,Ounans,Nord,1650,true
+39380,Pagnoz,Nord,1650,true
+39380,Santans,Nord,1650,true
+39390,Fay-en-Montagne,Vignoble,1700,true
+39390,Vercia,Centre,1650,true
+39400,Bellefontaine,Haut-Jura,1750,true
+39400,Hauts de Bienne,Haut-Jura,1700,true
+39400,Lac-des-Rouges-Truites,Haut-Jura,1650,true
+39400,Les Piards,Haut-Jura,1600,true
+39400,Longchaumois,Haut-Jura,1850,true
+39400,Morbier,Haut-Jura,1800,true
+39400,Prémanon,Haut-Jura,2000,true
+39400,Villard-sur-Bienne,Haut-Jura,1650,true
+39410,Lemuy,Vignoble,1600,true
+39410,Saint-Aubin,Vignoble,1650,true
+39420,Crans,Vignoble,1650,true
+39420,Molain,Vignoble,1600,true
+39430,Charchilla,Nord,1600,true
+39430,Les Planches-près-Arbois,Vignoble,1750,true
+39430,Montigny-lès-Arsures,Vignoble,1800,true
+39430,Pupillin,Vignoble,1850,true
+39440,Chassal,Haut-Jura,1650,true
+39440,Villard-sur-Bienne,Haut-Jura,1700,true
+39450,Battrans,Nord,1600,true
+39450,Chatelay,Nord,1650,true
+39450,Montbarrey,Nord,1600,true
+39450,Ounans,Nord,1650,true
+39450,Santans,Nord,1600,true
+39460,Foncine-le-Bas,Haut-Jura,1650,true
+39460,Foncine-le-Haut,Haut-Jura,1700,true
+39470,Chaussenans,Nord,1600,true
+39470,Chemenot,Nord,1600,true
+39470,Romange,Nord,1600,true
+39470,Thervay,Nord,1650,true
+39500,Asnans-Beauvoisin,Nord,1700,true
+39500,Choisey,Nord,1750,true
+39500,Champvans,Nord,1700,true
+39500,Evans,Nord,1750,true
+39500,La Loye,Nord,1650,true
+39500,Longwy-sur-le-Doubs,Nord,1700,true
+39500,Offlanges,Nord,1650,true
+39500,Petit-Noir,Nord,1650,true
+39500,Rochefort-sur-Nenon,Nord,1800,true
+39500,Tassenières,Nord,1650,true
+39510,Chapelle-d'Huin,Haut-Jura,1650,true
+39510,Mesnois,Vignoble,1650,true
+39520,Chevreaux,Centre,1600,true
+39520,Commenailles,Centre,1650,true
+39520,Moutonne,Centre,1600,true
+39520,Nance,Centre,1650,true
+39530,Darbonnay,Centre,1600,true
+39530,Sermange,Centre,1650,true
+39540,Foulenay,Centre,1600,true
+39540,Montrond,Centre,1650,true
+39550,Aresches,Vignoble,1600,true
+39550,Macornay,Centre,1700,true
+39550,Mesnois,Vignoble,1650,true
+39570,Courlaoux,Centre,1950,true
+39570,Gevingey,Centre,1900,true
+39570,Macornay,Centre,2000,true
+39570,Messia-sur-Sorne,Centre,1900,true
+39570,Montaigu,Centre,1950,true
+39570,Pannessières,Centre,1900,true
+39570,Trenal,Centre,1850,true
+39580,Bellecombe,Haut-Jura,1650,true
+39580,Vaux-lès-Saint-Claude,Haut-Jura,1700,true
+39590,Chaussenans,Nord,1600,true
+39600,Les Arsures,Vignoble,2000,true
+39600,Mesnay,Vignoble,1950,true
+39600,Mont-sous-Vaudrey,Vignoble,1850,true
+39600,Pupillin,Vignoble,2100,true
+39600,Saint-Cyr-Montmalin,Vignoble,1850,true
+39600,Villette-lès-Arbois,Vignoble,1900,true
+39700,Chaussin,Nord,1700,true
+39700,Dampierre,Nord,1650,true
+39700,Ounans,Nord,1700,true
