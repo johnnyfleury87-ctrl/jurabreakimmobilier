@@ -10,10 +10,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { loadStripe } from '@stripe/stripe-js'
 import styles from './page.module.css'
-
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
 
 export default function PaiementEstimationPage() {
   const router = useRouter()
@@ -74,32 +71,27 @@ export default function PaiementEstimationPage() {
     setError(null)
     
     try {
-      // Créer une session de paiement Stripe
+      // TODO: Intégration Stripe à venir
+      // Pour l'instant, simuler le paiement pour les tests
+      setError('Paiement Stripe en cours de configuration. Veuillez contacter l\'administrateur.')
+      setProcessing(false)
+      
+      /* Code Stripe à activer après configuration :
       const response = await fetch('/api/stripe/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           estimation_id: id,
           formule: estimation.formule,
-          amount: estimation.formule === 'standard' ? 4900 : 14900 // 49€ ou 149€
+          amount: estimation.formule === 'standard' ? 4900 : 14900
         })
       })
       
       const session = await response.json()
+      if (!response.ok) throw new Error(session.error)
       
-      if (!response.ok) {
-        throw new Error(session.error || 'Erreur création session paiement')
-      }
-      
-      // Rediriger vers Stripe Checkout
-      const stripe = await stripePromise
-      const { error: stripeError } = await stripe.redirectToCheckout({
-        sessionId: session.sessionId
-      })
-      
-      if (stripeError) {
-        throw new Error(stripeError.message)
-      }
+      window.location.href = session.url
+      */
       
     } catch (err) {
       console.error('Erreur paiement:', err)
