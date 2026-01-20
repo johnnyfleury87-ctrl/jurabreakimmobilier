@@ -28,7 +28,9 @@ CREATE POLICY IF NOT EXISTS "Users can update own estimations"
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
-RAISE NOTICE '[0014] Policies utilisateurs recréées avec user_id';
+DO $$ BEGIN
+  RAISE NOTICE '[0014] Policies utilisateurs recréées avec user_id';
+END $$;
 
 -- =====================================================================
 -- 2. POLICY ADMIN (inchangée, mais on la recrée pour cohérence)
@@ -57,7 +59,9 @@ CREATE POLICY IF NOT EXISTS "Admins can update all estimations"
     )
   );
 
-RAISE NOTICE '[0014] Policies admin vérifiées';
+DO $$ BEGIN
+  RAISE NOTICE '[0014] Policies admin vérifiées';
+END $$;
 
 -- =====================================================================
 -- 3. S'ASSURER QUE RLS EST ACTIVÉ
