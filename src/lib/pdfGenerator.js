@@ -110,9 +110,11 @@ export async function generateEstimationPDF(estimation, formule, options = {}) {
       }
       
       if (estimation.etat_bien) {
-        doc.text(`État du bien : ${formatEtatBien(estimation.etat_bien)}`)
+        doc.text(`État du bien : ${formatEtatBien(estimation.etat_bien)}`);
       }
-        doc.text(`Année de construction : ${estimation.annee_construction}`)
+      
+      if (estimation.annee_construction) {
+        doc.text(`Année de construction : ${estimation.annee_construction}`);
       }
       
       // Options sélectionnées
