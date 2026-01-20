@@ -2,36 +2,47 @@
 
 ## 🎯 RÉSUMÉ EN 1 LIGNE
 
-**Migration DB idempotente + schéma cohérent + seed communes + suppression joins profiles + PDF fix + logs détaillés**
+**⚠️ STRATÉGIE CORRECTIVE:** Migrations 0013+0014 (ADDITIVES) pour réparer sans toucher à 0011 déjà appliquée en prod
+
+**Règle absolue:** Une migration appliquée en prod est figée à vie. On corrige APRÈS, jamais DESSUS.
 
 ---
 
 ## 📄 DOCUMENTS CRÉÉS (par ordre de lecture)
 
-### 1️⃣ ACTION IMMÉDIATE ⚡ (LIRE EN PREMIER)
+### 1️⃣ STRATÉGIE CORRECTIVE ⚡ (LIRE EN PREMIER)
+**[MIGRATION_CORRECTIVE_RESUME.md](MIGRATION_CORRECTIVE_RESUME.md)**
+- ⏱️ **Lecture: 3 min**
+- 🎯 **Contenu:** Pourquoi migrations 0013+0014 au lieu de modifier 0011
+- 👤 **Pour qui:** Toute personne qui doit comprendre l'approche
+- ✅ **Règle absolue:** Migration 0011 figée, on corrige APRÈS
+
+---
+
+### 2️⃣ ACTION IMMÉDIATE ⚡
 **[ACTION_IMMEDIATE_ESTIMATION.md](ACTION_IMMEDIATE_ESTIMATION.md)**
 - ⏱️ **Lecture: 2 min**
-- 🎯 **Contenu:** Guide rapide 3 étapes (audit + migrations + déploiement)
+- 🎯 **Contenu:** Guide rapide (audit + migrations 0013/0014 + déploiement)
 - 👤 **Pour qui:** Quelqu'un qui veut déployer maintenant
 - ✅ **Inclut:** Tests rapides + troubleshooting express
 
 ---
 
-### 2️⃣ GUIDE DÉPLOIEMENT COMPLET 📖
+### 3️⃣ GUIDE DÉPLOIEMENT COMPLET 📖
 **[GUIDE_DEPLOIEMENT_ESTIMATION_FIX.md](GUIDE_DEPLOIEMENT_ESTIMATION_FIX.md)**
-- ⏱️ **Lecture: 15 min**
-- 🎯 **Contenu:** 10 étapes détaillées avec scripts SQL et vérifications
+- ⏱️ **Lecture: 10 min**
+- 🎯 **Contenu:** 8 étapes détaillées avec scripts SQL et vérifications
 - 👤 **Pour qui:** Admin qui déploie en production
 - ✅ **Inclut:** 
-  - Scripts SQL complets à copier/coller
+  - Scripts SQL complets à copier/coller (0013 + 0014)
   - Vérifications après chaque étape
-  - Checklist post-déploiement (10 points)
+  - Checklist post-déploiement (12 points)
   - Troubleshooting détaillé (4 erreurs communes)
   - État final attendu (tables, colonnes, RLS)
 
 ---
 
-### 3️⃣ RÉSUMÉ CORRECTIONS ✅
+### 4️⃣ RÉSUMÉ CORRECTIONS ✅
 **[RESUME_CORRECTIONS_ESTIMATION.md](RESUME_CORRECTIONS_ESTIMATION.md)**
 - ⏱️ **Lecture: 10 min**
 - 🎯 **Contenu:** Détail technique de chaque correction
@@ -45,7 +56,7 @@
 
 ---
 
-### 4️⃣ TODO FRONTEND 🎨
+### 5️⃣ TODO FRONTEND 🎨
 **[TODO_FRONTEND_PARCOURS_FORMULE.md](TODO_FRONTEND_PARCOURS_FORMULE.md)**
 - ⏱️ **Lecture: 15 min**
 - 🎯 **Contenu:** Refonte parcours estimation avec formule AVANT critères
@@ -64,9 +75,10 @@
 ### Migrations SQL
 ```
 supabase/migrations/
-├── 0011_estimation_complete_v2.sql           ← Migration complète idempotente
-├── 0011b_repair_estimations_schema.sql      ← Ajout colonnes si table existe
-└── 0012_estimation_rls.sql                  ← Policies RLS (existante)
+├── 0011_estimation_complete.sql           ← EXISTANTE (ne pas toucher)
+├── 0012_estimation_rls.sql                ← EXISTANTE (ne pas toucher)
+├── 0013_fix_estimation_schema.sql         ← NOUVELLE (additive, idempotente)
+└── 0014_fix_estimation_rls.sql            ← NOUVELLE (fix RLS avec user_id)
 ```
 
 ### Seed
@@ -98,18 +110,22 @@ src/
 
 ## 🗺️ PARCOURS RECOMMANDÉ
 
-### Pour déployer MAINTENANT (20 min)
+### Pour comprendre la STRATÉGIE (5 min)
+1. Lire [MIGRATION_CORRECTIVE_RESUME.md](MIGRATION_CORRECTIVE_RESUME.md) (3 min)
+2. Comprendre pourquoi 0013+0014 au lieu de modifier 0011 (2 min)
+
+### Pour déployer MAINTENANT (10 min)
 1. Lire [ACTION_IMMEDIATE_ESTIMATION.md](ACTION_IMMEDIATE_ESTIMATION.md) (2 min)
-2. Exécuter audit DB (5 min)
-3. Exécuter migrations (10 min)
-4. Push code + attendre Vercel (5 min)
-5. Tests rapides (voir ACTION_IMMEDIATE)
+2. Exécuter audit DB (2 min)
+3. Exécuter migrations 0013 + 0014 (4 min)
+4. Tests rapides (2 min)
 
 ### Pour comprendre en DÉTAIL (1h)
-1. Lire [RESUME_CORRECTIONS_ESTIMATION.md](RESUME_CORRECTIONS_ESTIMATION.md) (10 min)
-2. Lire [GUIDE_DEPLOIEMENT_ESTIMATION_FIX.md](GUIDE_DEPLOIEMENT_ESTIMATION_FIX.md) (15 min)
-3. Regarder les fichiers SQL (20 min)
-4. Regarder le code source modifié (15 min)
+1. Lire [MIGRATION_CORRECTIVE_RESUME.md](MIGRATION_CORRECTIVE_RESUME.md) (3 min)
+2. Lire [RESUME_CORRECTIONS_ESTIMATION.md](RESUME_CORRECTIONS_ESTIMATION.md) (10 min)
+3. Lire [GUIDE_DEPLOIEMENT_ESTIMATION_FIX.md](GUIDE_DEPLOIEMENT_ESTIMATION_FIX.md) (10 min)
+4. Regarder les fichiers SQL 0013 + 0014 (15 min)
+5. Regarder le code source modifié (15 min)
 
 ### Pour dev FRONTEND (1 journée)
 1. Lire [TODO_FRONTEND_PARCOURS_FORMULE.md](TODO_FRONTEND_PARCOURS_FORMULE.md) (15 min)
@@ -197,6 +213,7 @@ src/
 ---
 
 **Dernière mise à jour:** 20 janvier 2026  
-**Version:** 2.0  
-**Commits:** `6522c0a` (fix), `8b90584` (docs), `b6fcb69` (frontend todo)  
-**Status:** ✅ Prêt pour production
+**Version:** 2.1 (Migrations correctives 0013+0014)  
+**Commits:** `cab42a1` (migrations correctives)  
+**Status:** ✅ Prêt pour production  
+**Stratégie:** ADDITIVE (ne touche pas aux migrations existantes)
