@@ -12,9 +12,11 @@ export async function generateEstimationPDF(estimation, formule, options = {}) {
   
   return new Promise((resolve, reject) => {
     try {
-      console.log('[pdfGenerator] Début génération')
+      console.log('[pdfGenerator] ========== DÉBUT GÉNÉRATION ==========')
+      console.log('[pdfGenerator] Environment:', process.env.NODE_ENV)
+      console.log('[pdfGenerator] Platform:', process.platform)
       console.log('[pdfGenerator] Test mode:', testMode)
-      console.log('[pdfGenerator] Estimation fields:', Object.keys(estimation || {}).join(', '))
+      console.log('[pdfGenerator] Estimation ID:', estimation?.id)
       
       // Validation données critiques avec fallbacks
       const safeEstimation = {
@@ -42,27 +44,37 @@ export async function generateEstimationPDF(estimation, formule, options = {}) {
         created_at: estimation?.created_at || new Date().toISOString()
       }
       
-      console.log('[pdfGenerator] Safe estimation:', safeEstimation.id)
+      console.log('[pdfGenerator] Création PDFDocument...')
       
+      // 🔧 FIX VERCEL: Ne pas spécifier de font par défaut
+      // Laisser pdfkit utiliser ses fonts intégrées
       const doc = new PDFDocument({
         size: 'A4',
-        margins: { top: 50, bottom: 50, left: 50, right: 50 }
+        margins: { top: 50, bottom: 50, left: 50, right: 50 },
+        bufferPages: true,
+        autoFirstPage: true
       })
+
+      console.log('[pdfGenerator] PDFDocument créé')
 
       const buffers = []
       doc.on('data', buffers.push.bind(buffers))
       doc.on('end', () => {
         const pdfBuffer = Buffer.concat(buffers)
-        console.log('[pdfGenerator] PDF terminé, taille:', pdfBuffer.length)
+        console.log('[pdfGenerator] ✅ PDF terminé, taille:', pdfBuffer.length)
         resolve(pdfBuffer)
       })
       doc.on('error', (err) => {
-        console.error('[pdfGenerator] Erreur PDFKit:', err)
+        console.error('[pdfGenerator] ❌ Erreur PDFKit:', err)
+        console.error('[pdfGenerator] Stack:', err.stack)
         reject(err)
       })
 
+      console.log('[pdfGenerator] Démarrage du rendu...')
+
       // ========== WATERMARK MODE TEST ==========
       if (testMode) {
+        console.log('[pdfGenerator] Ajout watermark TEST')
         doc.save()
         doc.rotate(45, { origin: [300, 400] })
         doc.fontSize(60)
@@ -83,29 +95,33 @@ export async function generateEstimationPDF(estimation, formule, options = {}) {
       }
 
       // ========== EN-TÊTE ==========
-      doc.fontSize(24)
-         .fillColor('#2c5282')
-         .text('JuraBreak Immobilier', { align: 'center' })
-      
-      doc.fontSize(12)
-         .fillColor('#666')
-         .text('Votre agence immobilière de confiance dans le Jura', { align: 'center' })
-      
-      doc.moveDown(2)
-      
-      // ========== TITRE ==========
-      doc.fontSize(20)
-         .fillColor('#2c5282')
-         .text(`Estimation ${safeEstimation.formule === 'premium' ? 'Premium' : safeEstimation.formule === 'standard' ? 'Standard' : 'Gratuite'}`, { align: 'center' })
-      
-      doc.moveDown(1)
-      
-      // ========== INFORMATIONS CLIENT ==========
-      doc.fontSize(14)
-         .fillColor('#000')
-         .text('Informations du propriétaire', { underline: true })
-      
-      doc.moveDown(0.5)
+      console.log('[pdfGenerator] Rendu en-tête')
+      try {
+        doc.fontSize(24)
+           .fillColor('#2c5282')
+           .text('JuraBreak Immobilier', { align: 'center' })
+        
+        doc.fontSize(12)
+           .fillColor('#666')
+           .text('Votre agence immobilière de confiance dans le Jura', { align: 'center' })
+        
+        doc.moveDown(2)
+        
+        // ========== TITRE ==========
+        console.log('[pdfGenerator] Rendu titre')
+        doc.fontSize(20)
+           .fillColor('#2c5282')
+           .text(`Estimation ${safeEstimation.formule === 'premium' ? 'Premium' : safeEstimation.formule === 'standard' ? 'Standard' : 'Gratuite'}`, { align: 'center' })
+        
+        doc.moveDown(1)
+        
+        // ========== INFORMATIONS CLIENT ==========
+        console.log('[pdfGenerator] Rendu infos client')
+        doc.fontSize(14)
+           .fillColor('#000')
+           .text('Informations du propriétaire', { underline: true })
+        
+        doc.moveDown(0.5)
       doc.fontSize(11)
          .fillColor('#333')
          .text(`Nom : ${safeEstimation.nom} ${safeEstimation.prenom}`)
@@ -270,8 +286,17 @@ export async function generateEstimationPDF(estimation, formule, options = {}) {
       console.log('[pdfGenerator] Finalisation du PDF')
       // Finaliser le PDF
       doc.end()
+      } catch (renderError) {
+        console.error('[pdfGenerator] ❌ ERREUR PENDANT LE RENDU:', renderError)
+        console.error('[pdfGenerator] Message:', renderError.message)
+        console.error('[pdfGenerator] Code:', renderError.code)
+        console.error('[pdfGenerator] Stack:', renderError.stack)
+        reject(new Error(`Erreur rendu PDF: ${renderError.message} (code: ${renderError.code})`))
+      }
     } catch (error) {
-      console.error('[pdfGenerator] Erreur génération:', error)
+      console.error('[pdfGenerator] ❌ Erreur génération globale:', error)
+      console.error('[pdfGenerator] Message:', error.message)
+      console.error('[pdfGenerator] Stack:', error.stack)
       reject(error)
     }
   })
