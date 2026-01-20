@@ -46,8 +46,8 @@ export async function generateEstimationPDF(estimation, formule, options = {}) {
       
       console.log('[pdfGenerator] Création PDFDocument...')
       
-      // 🔧 FIX VERCEL: Ne pas spécifier de font par défaut
-      // Laisser pdfkit utiliser ses fonts intégrées
+      // 🔧 FIX VERCEL SERVERLESS: Forcer Courier (police core PDF sans .afm)
+      // Évite ENOENT: Helvetica.afm qui n'existe pas dans /var/task/.next/
       const doc = new PDFDocument({
         size: 'A4',
         margins: { top: 50, bottom: 50, left: 50, right: 50 },
@@ -56,6 +56,10 @@ export async function generateEstimationPDF(estimation, formule, options = {}) {
       })
 
       console.log('[pdfGenerator] PDFDocument créé')
+      
+      // Force Courier AVANT tout texte (évite chargement Helvetica.afm)
+      doc.font('Courier')
+      console.log('[pdfGenerator] Police forcée: Courier (sans dépendance .afm)')
 
       const buffers = []
       doc.on('data', buffers.push.bind(buffers))

@@ -146,22 +146,27 @@ export async function POST(request, { params }) {
     console.log(`${logPrefix} 🔑 Supabase URL: ${!!process.env.NEXT_PUBLIC_SUPABASE_URL}`)
     
     // 🔍 PISTE 4: GÉNÉRATION PDF ELLE-MÊME
+    console.log(`${logPrefix} 🎨 START RENDER`)
     let pdfBuffer
     try {
       console.log(`${logPrefix} Appel generateEstimationPDF...`)
+      console.log(`${logPrefix} Formule: ${estimation.formule}, Test mode: true`)
+      
       pdfBuffer = await generateEstimationPDF(estimation, estimation.formule, { testMode: true })
+      
       console.log(`${logPrefix} ✅ PDF buffer généré: ${pdfBuffer.length} bytes`)
     } catch (pdfError) {
       console.error(`${logPrefix} ❌ ERREUR GÉNÉRATION PDF:`, pdfError)
-      console.error(`${logPrefix} Stack PDF:`, pdfError.stack)
+      console.error(`${logPrefix} Message:`, pdfError.message)
+      console.error(`${logPrefix} Code:`, pdfError.code)
+      console.error(`${logPrefix} Stack:`, pdfError.stack)
       return NextResponse.json({
         ok: false,
         data: null,
         error: {
-          message: 'Erreur lors du rendu PDF',
-          details: pdfError.message,
-          stack: pdfError.stack,
-          code: 'PDF_RENDER_ERROR'
+          message: pdfError.message || 'Erreur lors du rendu PDF',
+          code: pdfError.code || 'PDF_RENDER_ERROR',
+          stack: pdfError.stack
         }
       }, { status: 500 })
     }
