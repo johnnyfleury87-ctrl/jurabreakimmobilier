@@ -9,8 +9,10 @@
  * - Accès ADMIN uniquement
  */
 
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { generateEstimationPDF } from '@/lib/pdfGenerator'
 
 export const dynamic = 'force-dynamic'
 
@@ -119,79 +121,124 @@ export async function POST(request, { params }) {
     }
     
     console.log(`${logPrefix} ✅ Estimation chargée - Formule: ${estimation.formule}`)
-    console.log(`${logPrefix} Email client: ${estimation.email}`)
+    console.log(`${logPrefix} Champs présents:`, Object.keys(estimation).join(', '))
+    console.log(`${logPrefix} Statut paiement: ${estimation.statut_paiement}`)
 
-    // 4. GÉNÉRER LE PDF EN MODE TEST
-    console.log(`${logPrefix} Étape 4: Génération PDF...`)
-    const pdfUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/api/pdf/generate`
-    console.log(`${logPrefix} URL génération: ${pdfUrl}`)
+    // 🔍 PISTE 1: VÉRIFICATION MODE TEST - IGNORE STATUT PAIEMENT
+    console.log(`${logPrefix} ⚠️ MODE TEST = IGNORE STATUT PAIEMENT`)
+
+    // 4. GÉNÉRER LE PDF DIRECTEMENT (pas de fetch HTTP)
+    console.log(`${logPrefix} Étape 4: Génération PDF directe...`)
     
-    const pdfResponse = await fetch(pdfUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Admin-Test': 'true'
-      },
-      body: JSON.stringify({
-        estimation_id: id,
-        test_mode: true,
-        formule: estimation.formule,
-        user_email: estimation.email || 'test@jurabreakimmobilier.com',
-        calcul_detail: estimation.calcul_detail
-      })
-    })
-
-    if (!pdfResponse.ok) {
-      const error = await pdfResponse.json()
-      console.error(`${logPrefix} ❌ Erreur service PDF:`, error)
+    // Créer client service role pour upload
+    const supabaseAdmin = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+    
+    console.log(`${logPrefix} 🔑 Service role présente: ${!!process.env.SUPABASE_SERVICE_ROLE_KEY}`)
+    console.log(`${logPrefix} 🔑 Supabase URL: ${!!process.env.NEXT_PUBLIC_SUPABASE_URL}`)
+    
+    // 🔍 PISTE 4: GÉNÉRATION PDF ELLE-MÊME
+    let pdfBuffer
+    try {
+      console.log(`${logPrefix} Appel generateEstimationPDF...`)
+      pdfBuffer = await generateEstimationPDF(estimation, estimation.formule, { testMode: true })
+      console.log(`${logPrefix} ✅ PDF buffer généré: ${pdfBuffer.length} bytes`)
+    } catch (pdfError) {
+      console.error(`${logPrefix} ❌ ERREUR GÉNÉRATION PDF:`, pdfError)
+      console.error(`${logPrefix} Stack PDF:`, pdfError.stack)
       return NextResponse.json({
         ok: false,
         data: null,
         error: {
-          message: error.details || error.error || 'Erreur génération PDF',
-          details: error.details,
-          code: 'PDF_GENERATION_ERROR'
+          message: 'Erreur lors du rendu PDF',
+          details: pdfError.message,
+          stack: pdfError.stack,
+          code: 'PDF_RENDER_ERROR'
         }
       }, { status: 500 })
     }
 
-    const pdfResult = await pdfResponse.json()
-    const pdfPath = pdfResult.data?.pdf_path || pdfResult.pdf_path
-    console.log(`${logPrefix} ✅ PDF généré: ${pdfPath}`)
+    // 5. UPLOAD SUR STORAGE
+    console.log(`${logPrefix} Étape 5: Upload sur Storage...`)
+    const timestamp = Date.now()
+    const fileName = `TEST_estimation_${id}_${timestamp}.pdf`
+    const filePath = `estimations/${fileName}`
+    
+    console.log(`${logPrefix} 📁 Upload path: ${filePath}`)
+    
+    // 🔍 PISTE 5: STORAGE SUPABASE
+    const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
+      .from('estimations')
+      .upload(filePath, pdfBuffer, {
+        contentType: 'application/pdf',
+        upsert: false
+      })
 
-    // 5. METTRE À JOUR L'ESTIMATION
-    console.log(`${logPrefix} Étape 5: MAJ base de données...`)
-    const { error: updateError } = await supabase
+    if (uploadError) {
+      console.error(`${logPrefix} ❌ Erreur upload storage:`, uploadError)
+      console.error(`${logPrefix} Upload error détails:`, JSON.stringify(uploadError, null, 2))
+      return NextResponse.json({
+        ok: false,
+        data: null,
+        error: {
+          message: 'Erreur lors de l\'upload du PDF',
+          details: uploadError.message,
+          code: uploadError.code || 'STORAGE_ERROR',
+          hint: uploadError.hint
+        }
+      }, { status: 500 })
+    }
+
+    console.log(`${logPrefix} ✅ Upload réussi:`, uploadData)
+    console.log(`${logPrefix} 📄 PDF Path: ${filePath}`)
+
+    // 6. METTRE À JOUR L'ESTIMATION AVEC SERVICE ROLE (bypass RLS)
+    console.log(`${logPrefix} Étape 6: MAJ base de données avec service role...`)
+    
+    // 🔍 PISTE 3: SUPABASE SERVICE ROLE POUR UPDATE
+    const { data: updateData, error: updateError } = await supabaseAdmin
       .from('estimations')
       .update({
-        pdf_path: pdfPath,
+        pdf_path: filePath,
         pdf_generated_at: new Date().toISOString(),
         pdf_mode: 'test'
       })
       .eq('id', id)
+      .select()
 
     if (updateError) {
       console.error(`${logPrefix} ❌ Erreur MAJ estimation:`, updateError)
+      console.error(`${logPrefix} Update error détails:`, JSON.stringify(updateError, null, 2))
       return NextResponse.json({
         ok: false,
         data: null,
         error: {
           message: 'Erreur mise à jour base de données',
           details: updateError.message,
-          code: updateError.code
+          code: updateError.code,
+          hint: updateError.hint
         }
       }, { status: 500 })
     }
     
-    console.log(`${logPrefix} ✅ DB mise à jour`)
-    console.log(`${logPrefix} === SUCCÈS ===`)
+    console.log(`${logPrefix} ✅ DB mise à jour:`, updateData)
+    console.log(`${logPrefix} === SUCCÈS COMPLET ===`)
 
     return NextResponse.json({
       ok: true,
       data: {
-        pdf_path: pdfPath,
+        pdf_path: filePath,
         pdf_mode: 'test',
-        formule: estimation.formule
+        formule: estimation.formule,
+        file_size: pdfBuffer.length
       },
       error: null,
       message: 'PDF test généré avec succès',
@@ -200,17 +247,25 @@ export async function POST(request, { params }) {
 
   } catch (error) {
     console.error(`${logPrefix} ❌ ERREUR GLOBALE:`, error)
+    console.error(`${logPrefix} Message:`, error.message)
     console.error(`${logPrefix} Stack:`, error.stack)
+    console.error(`${logPrefix} Name:`, error.name)
+    
+    // 🔍 LOGS ULTRA-DÉTAILLÉS POUR DEBUG
     return NextResponse.json({
       ok: false,
       data: null,
       error: {
         message: 'Erreur lors de la génération du PDF test',
         details: error.message,
-        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
-        code: 'INTERNAL_ERROR',
-        step: 'Voir logs serveur pour détails'
+        stack: error.stack,
+        name: error.name,
+        code: 'INTERNAL_ERROR'
       }
+    }, { status: 500 })
+  }
+}
+
     }, { status: 500 })
   }
 }

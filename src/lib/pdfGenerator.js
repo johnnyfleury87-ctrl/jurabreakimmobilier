@@ -12,6 +12,38 @@ export async function generateEstimationPDF(estimation, formule, options = {}) {
   
   return new Promise((resolve, reject) => {
     try {
+      console.log('[pdfGenerator] Début génération')
+      console.log('[pdfGenerator] Test mode:', testMode)
+      console.log('[pdfGenerator] Estimation fields:', Object.keys(estimation || {}).join(', '))
+      
+      // Validation données critiques avec fallbacks
+      const safeEstimation = {
+        id: estimation?.id || 'N/A',
+        nom: estimation?.nom || 'Non renseigné',
+        prenom: estimation?.prenom || 'Non renseigné',
+        email: estimation?.email || 'noreply@jurabreakimmobilier.com',
+        telephone: estimation?.telephone || 'Non renseigné',
+        commune_nom: estimation?.commune_nom || 'Non renseignée',
+        code_postal: estimation?.code_postal || '39000',
+        surface_habitable: estimation?.surface_habitable || 0,
+        etat_bien: estimation?.etat_bien || 'correct',
+        nb_pieces: estimation?.nb_pieces || 0,
+        annee_construction: estimation?.annee_construction || null,
+        formule: estimation?.formule || formule || 'gratuite',
+        valeur_basse: estimation?.valeur_basse || 0,
+        valeur_mediane: estimation?.valeur_mediane || 0,
+        valeur_haute: estimation?.valeur_haute || 0,
+        niveau_fiabilite: estimation?.niveau_fiabilite || 'minimal',
+        motif: estimation?.motif || null,
+        motif_autre_detail: estimation?.motif_autre_detail || null,
+        options_selectionnees: Array.isArray(estimation?.options_selectionnees) 
+          ? estimation.options_selectionnees 
+          : [],
+        created_at: estimation?.created_at || new Date().toISOString()
+      }
+      
+      console.log('[pdfGenerator] Safe estimation:', safeEstimation.id)
+      
       const doc = new PDFDocument({
         size: 'A4',
         margins: { top: 50, bottom: 50, left: 50, right: 50 }
@@ -21,9 +53,13 @@ export async function generateEstimationPDF(estimation, formule, options = {}) {
       doc.on('data', buffers.push.bind(buffers))
       doc.on('end', () => {
         const pdfBuffer = Buffer.concat(buffers)
+        console.log('[pdfGenerator] PDF terminé, taille:', pdfBuffer.length)
         resolve(pdfBuffer)
       })
-      doc.on('error', reject)
+      doc.on('error', (err) => {
+        console.error('[pdfGenerator] Erreur PDFKit:', err)
+        reject(err)
+      })
 
       // ========== WATERMARK MODE TEST ==========
       if (testMode) {
@@ -60,7 +96,7 @@ export async function generateEstimationPDF(estimation, formule, options = {}) {
       // ========== TITRE ==========
       doc.fontSize(20)
          .fillColor('#2c5282')
-         .text(`Estimation ${formule === 'formule_2' ? 'Juridiquement Viable' : 'Détaillée'}`, { align: 'center' })
+         .text(`Estimation ${safeEstimation.formule === 'premium' ? 'Premium' : safeEstimation.formule === 'standard' ? 'Standard' : 'Gratuite'}`, { align: 'center' })
       
       doc.moveDown(1)
       
@@ -72,11 +108,11 @@ export async function generateEstimationPDF(estimation, formule, options = {}) {
       doc.moveDown(0.5)
       doc.fontSize(11)
          .fillColor('#333')
-         .text(`Nom : ${estimation.nom} ${estimation.prenom}`)
-         .text(`Email : ${estimation.email}`)
+         .text(`Nom : ${safeEstimation.nom} ${safeEstimation.prenom}`)
+         .text(`Email : ${safeEstimation.email}`)
       
-      if (estimation.telephone) {
-        doc.text(`Téléphone : ${estimation.telephone}`)
+      if (safeEstimation.telephone && safeEstimation.telephone !== 'Non renseigné') {
+        doc.text(`Téléphone : ${safeEstimation.telephone}`)
       }
       
       doc.moveDown(1.5)
@@ -89,28 +125,19 @@ export async function generateEstimationPDF(estimation, formule, options = {}) {
       doc.moveDown(0.5)
       doc.fontSize(11)
          .fillColor('#333')
-         .text(`Localisation : ${estimation.commune_nom} (${estimation.code_postal})`)
-         .text(`Type de bien : ${formatTypeBien(estimation.type_bien)}`)
-         .text(`Surface habitable : ${estimation.surface_habitable} m²`)
+         .text(`Localisation : ${safeEstimation.commune_nom} (${safeEstimation.code_postal})`)
+         .text(`Surface habitable : ${safeEstimation.surface_habitable} m²`)
       
-      if (estimation.surface_terrain) {
-        doc.text(`Surface terrain : ${estimation.surface_terrain} m²`)
+      if (safeEstimation.nb_pieces > 0) {
+        doc.text(`Nombre de pièces : ${safeEstimation.nb_pieces}`)
       }
       
-      if (estimation.nb_pieces) {
-        doc.text(`Nombre de pièces : ${estimation.nb_pieces}`)
+      if (safeEstimation.etat_bien) {
+        doc.text(`État du bien : ${formatEtatBien(safeEstimation.etat_bien)}`);
       }
       
-      if (estimation.nb_chambres) {
-        doc.text(`Nombre de chambres : ${estimation.nb_chambres}`)
-      }
-      
-      if (estimation.annee_construction) {
-        doc.text(`Année de construction : ${estimation.annee_construction}`)
-      }
-      
-      if (estimation.etat_bien) {
-        doc.text(`État du bien : ${formatEtatBien(estimation.etat_bien)}`);
+      if (safeEstimation.annee_construction) {
+        doc.text(`Année de construction : ${safeEstimation.annee_construction}`);
       }
       
       if (estimation.annee_construction) {
@@ -118,25 +145,25 @@ export async function generateEstimationPDF(estimation, formule, options = {}) {
       }
       
       // Options sélectionnées
-      if (estimation.options_selectionnees && Array.isArray(estimation.options_selectionnees) && estimation.options_selectionnees.length > 0) {
+      if (safeEstimation.options_selectionnees && safeEstimation.options_selectionnees.length > 0) {
         doc.moveDown(0.5)
         doc.text('Options et plus-values :')
         doc.fontSize(10)
            .fillColor('#555')
-        estimation.options_selectionnees.forEach(opt => {
+        safeEstimation.options_selectionnees.forEach(opt => {
           doc.text(`• ${opt}`, { indent: 20 })
         })
         doc.fontSize(11).fillColor('#333')
       }
       
       // Motif de l'estimation
-      if (estimation.motif) {
+      if (safeEstimation.motif) {
         doc.moveDown(0.5)
-        doc.text(`Motif de l'estimation : ${formatMotif(estimation.motif)}`)
-        if (estimation.motif === 'autre' && estimation.motif_autre_detail) {
+        doc.text(`Motif de l'estimation : ${formatMotif(safeEstimation.motif)}`)
+        if (safeEstimation.motif === 'autre' && safeEstimation.motif_autre_detail) {
           doc.fontSize(10)
              .fillColor('#555')
-             .text(estimation.motif_autre_detail, { indent: 20 })
+             .text(safeEstimation.motif_autre_detail, { indent: 20 })
           doc.fontSize(11).fillColor('#333')
         }
       }
@@ -150,10 +177,10 @@ export async function generateEstimationPDF(estimation, formule, options = {}) {
       
       doc.moveDown(0.5)
       
-      // Utiliser les valeurs calculées si disponibles
-      const estimationBasse = estimation.valeur_basse || Math.round(estimation.surface_habitable * 1800)
-      const estimationHaute = estimation.valeur_haute || Math.round(estimation.surface_habitable * 2400)
-      const estimationMoyenne = estimation.valeur_mediane || Math.round((estimationBasse + estimationHaute) / 2)
+      // Utiliser les valeurs calculées si disponibles, sinon fallback
+      const estimationBasse = safeEstimation.valeur_basse || Math.round(safeEstimation.surface_habitable * 1800)
+      const estimationHaute = safeEstimation.valeur_haute || Math.round(safeEstimation.surface_habitable * 2400)
+      const estimationMoyenne = safeEstimation.valeur_mediane || Math.round((estimationBasse + estimationHaute) / 2)
       
       doc.fontSize(11)
          .fillColor('#333')
@@ -165,10 +192,10 @@ export async function generateEstimationPDF(estimation, formule, options = {}) {
       
       doc.moveDown(0.5)
       
-      if (estimation.niveau_fiabilite) {
+      if (safeEstimation.niveau_fiabilite) {
         doc.fontSize(10)
            .fillColor('#666')
-           .text(`Niveau de fiabilité : ${formatNiveauFiabilite(estimation.niveau_fiabilite)}`)
+           .text(`Niveau de fiabilité : ${formatNiveauFiabilite(safeEstimation.niveau_fiabilite)}`)
       }
       
       doc.moveDown(1)
@@ -188,14 +215,18 @@ export async function generateEstimationPDF(estimation, formule, options = {}) {
       doc.fontSize(10)
          .fillColor('#333')
       
-      if (formule === 'formule_2') {
-        doc.text('Cette estimation a été réalisée suite à une visite sur place par un professionnel de l\'immobilier.')
-           .text('Elle prend en compte les caractéristiques du bien, son état, son environnement et les transactions récentes dans le secteur.')
-           .text('Cette estimation a une valeur juridiquement reconnue et peut être utilisée dans un cadre légal.')
-      } else {
-        doc.text('Cette estimation a été réalisée sur la base des informations fournies et de l\'analyse du marché local.')
-           .text('Elle prend en compte les caractéristiques du bien et les transactions récentes dans le secteur.')
+      if (safeEstimation.formule === 'premium') {
+        doc.text('Cette estimation premium a été réalisée avec analyse détaillée des caractéristiques du bien.')
+           .text('Elle prend en compte les éléments de confort, l\'état général et les transactions récentes.')
            .text('Cette estimation est indicative et ne constitue pas une expertise officielle.')
+      } else if (safeEstimation.formule === 'standard') {
+        doc.text('Cette estimation standard a été réalisée sur la base des informations fournies.')
+           .text('Elle prend en compte les caractéristiques principales et les transactions locales.')
+           .text('Cette estimation est indicative.')
+      } else {
+        doc.text('Cette estimation gratuite a été réalisée sur la base des informations de base.')
+           .text('Elle donne une première indication de valeur.')
+           .text('Pour une estimation plus précise, consultez nos formules payantes.')
       }
       
       doc.moveDown(2)
@@ -210,23 +241,17 @@ export async function generateEstimationPDF(estimation, formule, options = {}) {
       doc.moveDown(0.5)
       doc.fontSize(9)
          .fillColor('#333')
-         .text(getMentionsLegales(formule), { align: 'justify', lineGap: 3 })
+         .text(getMentionsLegales(safeEstimation.formule), { align: 'justify', lineGap: 3 })
       
       doc.moveDown(2)
       
       // ========== SIGNATURE ==========
-      if (formule === 'formule_2') {
-        doc.fontSize(10)
-           .fillColor('#333')
-           .text(`Établi le ${new Date().toLocaleDateString('fr-FR')}`, { align: 'right' })
-        
-        doc.moveDown(1)
-        doc.text('Signature et cachet de l\'agence :', { align: 'right' })
-        doc.moveDown(2)
-        doc.fontSize(12)
-           .fillColor('#2c5282')
-           .text('JuraBreak Immobilier', { align: 'right' })
-      }
+      doc.fontSize(10)
+         .fillColor('#333')
+         .text(`Établi le ${new Date(safeEstimation.created_at).toLocaleDateString('fr-FR')}`, { align: 'right' })
+      
+      doc.moveDown(1)
+      doc.text('JuraBreak Immobilier', { align: 'right' })
       
       // ========== FOOTER ==========
       const pageCount = doc.bufferedPageRange().count
@@ -242,9 +267,11 @@ export async function generateEstimationPDF(estimation, formule, options = {}) {
            )
       }
       
+      console.log('[pdfGenerator] Finalisation du PDF')
       // Finaliser le PDF
       doc.end()
     } catch (error) {
+      console.error('[pdfGenerator] Erreur génération:', error)
       reject(error)
     }
   })
