@@ -132,7 +132,7 @@ export async function POST(request) {
       code_postal: body.code_postal,
       annee_construction: body.annee_construction ? parseInt(body.annee_construction) : null,
       etat_bien: body.etat_bien,
-      options_selectionnees: JSON.stringify(body.options_selectionnees || []),
+      options_selectionnees: body.options_selectionnees || [],
       
       // Champs premium (si fournis)
       nb_pieces: body.nb_pieces ? parseInt(body.nb_pieces) : null,
