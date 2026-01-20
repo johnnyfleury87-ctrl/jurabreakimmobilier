@@ -262,7 +262,9 @@ CREATE INDEX IF NOT EXISTS idx_estimations_email ON estimations(email);
 CREATE INDEX IF NOT EXISTS idx_estimations_code_postal ON estimations(code_postal);
 CREATE INDEX IF NOT EXISTS idx_estimations_commune ON estimations(commune_id);
 
-RAISE NOTICE '[0013] Index vérifiés';
+DO $$ BEGIN
+  RAISE NOTICE '[0013] Index vérifiés';
+END $$;
 
 -- =====================================================================
 -- 4. VALEURS PAR DÉFAUT SAFE (pour éviter NULL dans PDF)
