@@ -34,7 +34,7 @@ export default function PaiementEstimationPage() {
     try {
       const { data, error } = await supabase
         .from('estimations')
-        .select('*, profiles(email, nom, prenom)')
+        .select('*')
         .eq('id', id)
         .single()
       

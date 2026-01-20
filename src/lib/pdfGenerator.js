@@ -89,38 +89,54 @@ export async function generateEstimationPDF(estimation, formule, options = {}) {
       doc.moveDown(0.5)
       doc.fontSize(11)
          .fillColor('#333')
-         .text(`Adresse : ${estimation.adresse_bien}`)
+         .text(`Localisation : ${estimation.commune_nom} (${estimation.code_postal})`)
          .text(`Type de bien : ${formatTypeBien(estimation.type_bien)}`)
-         .text(`Surface : ${estimation.surface} m²`)
+         .text(`Surface habitable : ${estimation.surface_habitable} m²`)
+      
+      if (estimation.surface_terrain) {
+        doc.text(`Surface terrain : ${estimation.surface_terrain} m²`)
+      }
       
       if (estimation.nb_pieces) {
         doc.text(`Nombre de pièces : ${estimation.nb_pieces}`)
+      }
+      
+      if (estimation.nb_chambres) {
+        doc.text(`Nombre de chambres : ${estimation.nb_chambres}`)
       }
       
       if (estimation.annee_construction) {
         doc.text(`Année de construction : ${estimation.annee_construction}`)
       }
       
-      if (estimation.etat_general) {
-        doc.text(`État général : ${formatEtatGeneral(estimation.etat_general)}`)
+      if (estimation.etat_bien) {
+        doc.text(`État du bien : ${formatEtatBien(estimation.etat_bien)}`)
+      }
+        doc.text(`Année de construction : ${estimation.annee_construction}`)
       }
       
-      if (estimation.travaux) {
+      // Options sélectionnées
+      if (estimation.options_selectionnees && Array.isArray(estimation.options_selectionnees) && estimation.options_selectionnees.length > 0) {
         doc.moveDown(0.5)
-        doc.text('Travaux :')
+        doc.text('Options et plus-values :')
         doc.fontSize(10)
            .fillColor('#555')
-           .text(estimation.travaux, { indent: 20 })
+        estimation.options_selectionnees.forEach(opt => {
+          doc.text(`• ${opt}`, { indent: 20 })
+        })
         doc.fontSize(11).fillColor('#333')
       }
       
-      if (estimation.environnement) {
+      // Motif de l'estimation
+      if (estimation.motif) {
         doc.moveDown(0.5)
-        doc.text('Environnement :')
-        doc.fontSize(10)
-           .fillColor('#555')
-           .text(estimation.environnement, { indent: 20 })
-        doc.fontSize(11).fillColor('#333')
+        doc.text(`Motif de l'estimation : ${formatMotif(estimation.motif)}`)
+        if (estimation.motif === 'autre' && estimation.motif_autre_detail) {
+          doc.fontSize(10)
+             .fillColor('#555')
+             .text(estimation.motif_autre_detail, { indent: 20 })
+          doc.fontSize(11).fillColor('#333')
+        }
       }
       
       doc.moveDown(2)
@@ -132,10 +148,10 @@ export async function generateEstimationPDF(estimation, formule, options = {}) {
       
       doc.moveDown(0.5)
       
-      // Calcul indicatif (à personnaliser selon votre logique métier)
-      const estimationBasse = Math.round(estimation.surface * 2000)
-      const estimationHaute = Math.round(estimation.surface * 2800)
-      const estimationMoyenne = Math.round((estimationBasse + estimationHaute) / 2)
+      // Utiliser les valeurs calculées si disponibles
+      const estimationBasse = estimation.valeur_basse || Math.round(estimation.surface_habitable * 1800)
+      const estimationHaute = estimation.valeur_haute || Math.round(estimation.surface_habitable * 2400)
+      const estimationMoyenne = estimation.valeur_mediane || Math.round((estimationBasse + estimationHaute) / 2)
       
       doc.fontSize(11)
          .fillColor('#333')
@@ -144,6 +160,14 @@ export async function generateEstimationPDF(estimation, formule, options = {}) {
       doc.fontSize(13)
          .fillColor('#2c5282')
          .text(`Valeur moyenne estimée : ${formatPrice(estimationMoyenne)}`, { bold: true })
+      
+      doc.moveDown(0.5)
+      
+      if (estimation.niveau_fiabilite) {
+        doc.fontSize(10)
+           .fillColor('#666')
+           .text(`Niveau de fiabilité : ${formatNiveauFiabilite(estimation.niveau_fiabilite)}`)
+      }
       
       doc.moveDown(1)
       
@@ -284,6 +308,46 @@ function formatTypeBien(type) {
     'autre': 'Autre'
   }
   return types[type] || type
+}
+
+/**
+ * Formate l'état du bien
+ */
+function formatEtatBien(etat) {
+  const etats = {
+    'a_renover': 'À rénover',
+    'correct': 'Correct',
+    'bon': 'Bon',
+    'tres_bon': 'Très bon / Récent'
+  }
+  return etats[etat] || etat
+}
+
+/**
+ * Formate le motif de l'estimation
+ */
+function formatMotif(motif) {
+  const motifs = {
+    'curiosite': 'Curiosité / Information',
+    'vente': 'Projet de vente',
+    'divorce': 'Divorce / Séparation',
+    'succession': 'Succession',
+    'notaire': 'Discussion notariale',
+    'autre': 'Autre'
+  }
+  return motifs[motif] || motif
+}
+
+/**
+ * Formate le niveau de fiabilité
+ */
+function formatNiveauFiabilite(niveau) {
+  const niveaux = {
+    'minimal': 'Minimal (±20%)',
+    'complet': 'Complet (±10%)',
+    'tres_complet': 'Très complet (±5%)'
+  }
+  return niveaux[niveau] || niveau
 }
 
 /**

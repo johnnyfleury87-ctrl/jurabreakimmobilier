@@ -200,12 +200,14 @@ export async function POST(request, { params }) {
 
   } catch (error) {
     console.error(`${logPrefix} ❌ ERREUR GLOBALE:`, error)
+    console.error(`${logPrefix} Stack:`, error.stack)
     return NextResponse.json({
       ok: false,
       data: null,
       error: {
         message: 'Erreur lors de la génération du PDF test',
         details: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
         code: 'INTERNAL_ERROR',
         step: 'Voir logs serveur pour détails'
       }

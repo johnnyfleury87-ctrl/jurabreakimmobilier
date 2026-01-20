@@ -132,6 +132,7 @@ export function calculerEstimation(inputs, regles) {
   const valeurCentrale = Math.round(valeurAjustee)
   
   // 7) DÉTERMINATION DU NIVEAU DE FIABILITÉ
+  // Dépend de la formule ET des données fournies
   let niveauFiabilite = 'minimal' // Par défaut
   let score = 0
   
@@ -142,12 +143,43 @@ export function calculerEstimation(inputs, regles) {
   if (inputs.commune_id) score += 3
   if (inputs.surface_terrain) score += 1
   if (inputs.annee_construction) score += 1
+  if (inputs.nb_pieces) score += 1
+  if (inputs.nb_chambres) score += 1
+  if (inputs.nb_salles_bain) score += 1
+  if (inputs.exposition) score += 1
+  if (inputs.chauffage) score += 1
+  if (inputs.dpe_classe) score += 1
   if (inputs.options_selectionnees && inputs.options_selectionnees.length > 0) score += 1
   
-  if (score >= 10) {
-    niveauFiabilite = 'tres_complet'
-  } else if (score >= 7) {
-    niveauFiabilite = 'complet'
+  // Ajustement selon la formule
+  const formule = inputs.formule || 'gratuite'
+  
+  if (formule === 'gratuite') {
+    // Formule gratuite = données minimales = toujours niveau minimal
+    niveauFiabilite = 'minimal'
+  } else if (formule === 'standard') {
+    // Standard = peut atteindre complet si données complètes
+    if (score >= 12) {
+      niveauFiabilite = 'complet'
+    } else {
+      niveauFiabilite = 'minimal'
+    }
+  } else if (formule === 'premium') {
+    // Premium = peut atteindre tres_complet
+    if (score >= 15) {
+      niveauFiabilite = 'tres_complet'
+    } else if (score >= 12) {
+      niveauFiabilite = 'complet'
+    } else {
+      niveauFiabilite = 'minimal'
+    }
+  } else {
+    // Calcul par score si formule non spécifiée (rétrocompatibilité)
+    if (score >= 15) {
+      niveauFiabilite = 'tres_complet'
+    } else if (score >= 10) {
+      niveauFiabilite = 'complet'
+    }
   }
   
   // 8) GÉNÉRATION DE LA FOURCHETTE OBLIGATOIRE
