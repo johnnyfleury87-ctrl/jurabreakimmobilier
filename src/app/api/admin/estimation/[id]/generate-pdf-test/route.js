@@ -265,7 +265,3 @@ export async function POST(request, { params }) {
     }, { status: 500 })
   }
 }
-
-    }, { status: 500 })
-  }
-}
