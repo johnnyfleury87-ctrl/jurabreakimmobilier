@@ -119,14 +119,22 @@ export async function PUT(request) {
     }
     
     return NextResponse.json(
-      { error: 'Type non reconnu' },
+      { 
+        error: 'Type non reconnu',
+        details: `Type reçu: ${type}. Attendu: 'parametre_global' ou 'config_formule'`,
+        code: 'INVALID_TYPE'
+      },
       { status: 400 }
     )
     
   } catch (error) {
     console.error('Erreur PUT parametres:', error)
     return NextResponse.json(
-      { error: 'Erreur serveur' },
+      { 
+        error: 'Erreur serveur',
+        details: error.message,
+        code: 'INTERNAL_ERROR'
+      },
       { status: 500 }
     )
   }

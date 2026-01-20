@@ -109,16 +109,24 @@ export default function AdminEstimationPage() {
           const dataEst = await responseEst.json()
           
           if (!responseEst.ok) {
-            throw new Error(dataEst.error || 'Erreur chargement estimations')
+            const errorMsg = dataEst.error?.message || dataEst.error || 'Erreur chargement estimations'
+            const errorCode = dataEst.error?.code || responseEst.status
+            console.error('[ADMIN UI] Erreur chargement estimations:', {
+              status: responseEst.status,
+              error: dataEst.error,
+              fullResponse: dataEst
+            })
+            throw new Error(`${errorMsg} (${errorCode})`)
           }
           
           console.log('[ADMIN UI] Estimations chargées:', dataEst.count)
-          setEstimations(dataEst.estimations || [])
+          setEstimations(dataEst.data || dataEst.estimations || [])
           break
       }
     } catch (error) {
       console.error('Erreur chargement:', error)
-      setMessage({ type: 'error', text: 'Erreur de chargement' })
+      const errorMessage = error.message || 'Erreur de chargement inconnue'
+      setMessage({ type: 'error', text: `Erreur chargement estimations: ${errorMessage}` })
     } finally {
       setLoading(false)
     }
@@ -739,18 +747,27 @@ function EstimationsTab({ estimations, onReload, setMessage }) {
       const result = await response.json()
 
       if (!response.ok) {
-        throw new Error(result.error || 'Erreur création estimation test')
+        const errorMsg = result.error?.message || result.error || 'Erreur création estimation test'
+        const errorCode = result.error?.code || response.status
+        console.error('[ADMIN UI] Erreur création test:', {
+          status: response.status,
+          error: result.error,
+          fullResponse: result
+        })
+        throw new Error(`${errorMsg} (${errorCode})`)
       }
 
       setMessage({ 
         type: 'success', 
-        text: `✅ Estimation test créée : #${result.estimation_id.slice(0, 8)}` 
+        text: `✅ Estimation test créée : #${result.data.estimation_id.slice(0, 8)}` 
       })
       
       // Recharger la liste
       onReload()
     } catch (error) {
-      setMessage({ type: 'error', text: error.message })
+      console.error('[ADMIN UI] Erreur complète:', error)
+      const errorMessage = error.message || 'Erreur inconnue lors de la création'
+      setMessage({ type: 'error', text: errorMessage })
     } finally {
       setCreatingTest(false)
     }
@@ -766,7 +783,14 @@ function EstimationsTab({ estimations, onReload, setMessage }) {
       const result = await response.json()
 
       if (!response.ok) {
-        throw new Error(result.error || 'Erreur génération PDF')
+        const errorMsg = result.error?.message || result.error || 'Erreur génération PDF'
+        const errorCode = result.error?.code || response.status
+        console.error('[ADMIN UI] Erreur génération PDF:', {
+          status: response.status,
+          error: result.error,
+          fullResponse: result
+        })
+        throw new Error(`${errorMsg} (${errorCode})`)
       }
 
       setMessage({ 
@@ -777,7 +801,9 @@ function EstimationsTab({ estimations, onReload, setMessage }) {
       // Recharger la liste
       onReload()
     } catch (error) {
-      setMessage({ type: 'error', text: error.message })
+      console.error('[ADMIN UI] Erreur complète génération PDF:', error)
+      const errorMessage = error.message || 'Erreur inconnue lors de la génération PDF'
+      setMessage({ type: 'error', text: errorMessage })
     } finally {
       setGeneratingPDF(null)
     }

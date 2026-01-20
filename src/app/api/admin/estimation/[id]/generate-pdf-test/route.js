@@ -12,8 +12,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 export async function POST(request, { params }) {
-  const supabase = createClient()
+  const supabase = await createClient()
   const { id } = params
   
   const logPrefix = `[ADMIN TEST ${id.slice(0, 8)}]`
@@ -27,7 +29,11 @@ export async function POST(request, { params }) {
     
     if (authError || !user) {
       console.error(`${logPrefix} ❌ Auth échouée:`, authError?.message)
-      return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
+      return NextResponse.json({ 
+        ok: false,
+        data: null,
+        error: { message: 'Non authentifié', code: 'AUTH_REQUIRED' } 
+      }, { status: 401 })
     }
     console.log(`${logPrefix} ✅ User authentifié: ${user.id}`)
 
@@ -39,7 +45,11 @@ export async function POST(request, { params }) {
 
     if (profileError || !profile || profile.role !== 'admin') {
       console.error(`${logPrefix} ❌ Rôle insuffisant:`, profile?.role)
-      return NextResponse.json({ error: 'Accès refusé : Admin uniquement' }, { status: 403 })
+      return NextResponse.json({ 
+        ok: false,
+        data: null,
+        error: { message: 'Accès refusé : Admin uniquement', code: 'FORBIDDEN' } 
+      }, { status: 403 })
     }
     console.log(`${logPrefix} ✅ Role admin confirmé`)
 
@@ -54,16 +64,26 @@ export async function POST(request, { params }) {
     if (paramError) {
       console.error(`${logPrefix} ❌ Erreur lecture paramètre:`, paramError)
       return NextResponse.json({ 
-        error: 'Erreur lecture paramètre mode test',
-        details: paramError.message
+        ok: false,
+        data: null,
+        error: { 
+          message: 'Erreur lecture paramètre mode test',
+          details: paramError.message,
+          code: paramError.code
+        }
       }, { status: 500 })
     }
 
     if (!param || param.valeur !== true) {
       console.warn(`${logPrefix} ⚠️ Mode test désactivé (valeur=${param?.valeur})`)
       return NextResponse.json({ 
-        error: 'Mode test PDF désactivé. Activez-le dans les paramètres admin.',
-        help: 'Admin > Estimation > Paramètres Globaux > Mode test PDF (admin)'
+        ok: false,
+        data: null,
+        error: { 
+          message: 'Mode test PDF désactivé. Activez-le dans les paramètres admin.',
+          hint: 'Admin > Estimation > Paramètres Globaux > Mode test PDF (admin)',
+          code: 'TEST_MODE_DISABLED'
+        }
       }, { status: 403 })
     }
     console.log(`${logPrefix} ✅ Mode test activé`)
@@ -79,14 +99,23 @@ export async function POST(request, { params }) {
     if (estError) {
       console.error(`${logPrefix} ❌ Erreur chargement estimation:`, estError)
       return NextResponse.json({ 
-        error: 'Erreur chargement estimation',
-        details: estError.message
+        ok: false,
+        data: null,
+        error: { 
+          message: 'Erreur chargement estimation',
+          details: estError.message,
+          code: estError.code
+        }
       }, { status: 500 })
     }
 
     if (!estimation) {
       console.error(`${logPrefix} ❌ Estimation introuvable`)
-      return NextResponse.json({ error: 'Estimation introuvable' }, { status: 404 })
+      return NextResponse.json({ 
+        ok: false,
+        data: null,
+        error: { message: 'Estimation introuvable', code: 'NOT_FOUND' } 
+      }, { status: 404 })
     }
     
     console.log(`${logPrefix} ✅ Estimation chargée - Formule: ${estimation.formule}`)
@@ -114,7 +143,15 @@ export async function POST(request, { params }) {
     if (!pdfResponse.ok) {
       const error = await pdfResponse.json()
       console.error(`${logPrefix} ❌ Erreur service PDF:`, error)
-      throw new Error(error.details || error.error || 'Erreur génération PDF')
+      return NextResponse.json({
+        ok: false,
+        data: null,
+        error: {
+          message: error.details || error.error || 'Erreur génération PDF',
+          details: error.details,
+          code: 'PDF_GENERATION_ERROR'
+        }
+      }, { status: 500 })
     }
 
     const pdfResult = await pdfResponse.json()
@@ -133,27 +170,43 @@ export async function POST(request, { params }) {
 
     if (updateError) {
       console.error(`${logPrefix} ❌ Erreur MAJ estimation:`, updateError)
-      throw new Error(`Erreur MAJ DB: ${updateError.message}`)
+      return NextResponse.json({
+        ok: false,
+        data: null,
+        error: {
+          message: 'Erreur mise à jour base de données',
+          details: updateError.message,
+          code: updateError.code
+        }
+      }, { status: 500 })
     }
     
     console.log(`${logPrefix} ✅ DB mise à jour`)
     console.log(`${logPrefix} === SUCCÈS ===`)
 
     return NextResponse.json({
-      success: true,
+      ok: true,
+      data: {
+        pdf_path: pdfResult.pdf_path,
+        pdf_mode: 'test',
+        formule: estimation.formule
+      },
+      error: null,
       message: 'PDF test généré avec succès',
-      pdf_path: pdfResult.pdf_path,
-      pdf_mode: 'test',
-      formule: estimation.formule,
       warning: '⚠️ Ce PDF est en MODE TEST et ne doit pas être utilisé en production'
     })
 
   } catch (error) {
     console.error(`${logPrefix} ❌ ERREUR GLOBALE:`, error)
     return NextResponse.json({
-      error: 'Erreur lors de la génération du PDF test',
-      details: error.message,
-      step: 'Voir logs serveur pour détails'
+      ok: false,
+      data: null,
+      error: {
+        message: 'Erreur lors de la génération du PDF test',
+        details: error.message,
+        code: 'INTERNAL_ERROR',
+        step: 'Voir logs serveur pour détails'
+      }
     }, { status: 500 })
   }
 }
