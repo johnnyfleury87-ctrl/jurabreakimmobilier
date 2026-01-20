@@ -16,8 +16,6 @@ export async function generateEstimationPDF(estimation, formule, options = {}) {
   console.log('[pdfGenerator-jsPDF] Estimation ID:', estimation?.id)
   
   try {
-  try {
-      
     // Validation données critiques avec fallbacks
     const safeEstimation = {
       id: estimation?.id || 'N/A',
