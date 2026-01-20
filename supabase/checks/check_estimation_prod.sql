@@ -106,10 +106,15 @@ SELECT
 FROM estimations
 GROUP BY formule;
 
--- K. Vérifier config admin
-SELECT 
-    'K. CONFIG ADMIN' as check_type,
-    *
-FROM config_admin
-WHERE key LIKE 'estimation%'
-ORDER BY key;
+-- K. Vérifier config admin (si table existe)
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM information_schema.tables 
+        WHERE table_schema='public' AND table_name='config_admin'
+    ) THEN
+        RAISE NOTICE 'Table config_admin existe';
+    ELSE
+        RAISE NOTICE 'Table config_admin n''existe pas encore';
+    END IF;
+END $$;
