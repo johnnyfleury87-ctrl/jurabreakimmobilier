@@ -23,7 +23,9 @@ CREATE POLICY "Users can create own estimations"
   WITH CHECK (auth.uid() = user_id);
 
 -- Policy update pour que les users puissent modifier leurs estimations
-CREATE POLICY IF NOT EXISTS "Users can update own estimations"
+DROP POLICY IF EXISTS "Users can update own estimations" ON estimations;
+
+CREATE POLICY "Users can update own estimations"
   ON estimations FOR UPDATE
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
@@ -49,7 +51,9 @@ CREATE POLICY "Admins can view all estimations"
   );
 
 -- Policy admin pour modifications
-CREATE POLICY IF NOT EXISTS "Admins can update all estimations"
+DROP POLICY IF EXISTS "Admins can update all estimations" ON estimations;
+
+CREATE POLICY "Admins can update all estimations"
   ON estimations FOR UPDATE
   USING (
     EXISTS (
