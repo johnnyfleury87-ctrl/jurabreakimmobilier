@@ -21,34 +21,27 @@
 -- Noter: user_id existe? estimations_old existe?
 ```
 
-### 2️⃣ MIGRATIONS DB (10 min)
+### 2️⃣ MIGRATIONS DB (5 min)
 
-**Cas A:** Table estimations n'existe pas OU vous voulez repartir de zéro
+⚠️ **IMPORTANT:** La migration 0011 est déjà appliquée en prod. On NE LA TOUCHE PLUS.
+
+**Appliquer les migrations correctives:**
 ```sql
--- 1. Sauvegarder si besoin
-ALTER TABLE estimations RENAME TO estimations_old;
+-- 1. Correction schéma (ajoute colonnes manquantes)
+-- supabase/migrations/0013_fix_estimation_schema.sql
 
--- 2. Exécuter migration v2
--- supabase/migrations/0011_estimation_complete_v2.sql
+-- 2. Correction RLS (policies avec user_id)
+-- supabase/migrations/0014_fix_estimation_rls.sql
 
 -- 3. Seed communes
 -- supabase/seed/communes_jura_39.sql
-
--- 4. RLS
--- supabase/migrations/0012_estimation_rls.sql
 ```
 
-**Cas B:** Table estimations existe avec ancien schéma (user_id manquant)
-```sql
--- 1. Exécuter repair
--- supabase/migrations/0011b_repair_estimations_schema.sql
-
--- 2. Seed communes
--- supabase/seed/communes_jura_39.sql
-
--- 3. RLS
--- supabase/migrations/0012_estimation_rls.sql
-```
+**Ces migrations sont 100% additives:**
+- Ne suppriment rien
+- Ne renomment rien
+- Ajoutent uniquement ce qui manque
+- Peuvent être relancées sans erreur
 
 ### 3️⃣ DÉPLOYER CODE (5 min)
 ```bash
@@ -99,12 +92,12 @@ grep -r "profiles(" src/
 - **Guide détaillé:** [GUIDE_DEPLOIEMENT_ESTIMATION_FIX.md](GUIDE_DEPLOIEMENT_ESTIMATION_FIX.md)
 - **Résumé complet:** [RESUME_CORRECTIONS_ESTIMATION.md](RESUME_CORRECTIONS_ESTIMATION.md)
 
-## ⏱️ TEMPS TOTAL: ~20 minutes
+## ⏱️ TEMPS TOTAL: ~10 minutes
 
-5 min audit + 10 min migrations + 5 min déploiement code = **20 min**
+5 min audit + 5 min migrations correctives = **10 min**
 
 ---
 
 **Status:** Prêt pour prod ✅  
 **Date:** 20 jan 2026  
-**Commit:** `6522c0a`
+**Migrations:** 0013 + 0014 (correctives, additives)

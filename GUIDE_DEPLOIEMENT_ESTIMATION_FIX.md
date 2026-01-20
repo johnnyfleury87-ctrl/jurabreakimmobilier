@@ -19,42 +19,52 @@
 
 ---
 
-### ÉTAPE 2 : SAUVEGARDER L'ANCIENNE TABLE (SI NÉCESSAIRE)
+### ÉTAPE 2 : APPLIQUER LES MIGRATIONS CORRECTIVES ⚠️
 
-**SI `estimations_old` N'EXISTE PAS ENCORE :**
+**⚠️ RÈGLE ABSOLUE:** La migration 0011 est déjà appliquée en prod. **ON NE LA TOUCHE PLUS.**
 
-```sql
--- Sauvegarder l'ancienne table
-ALTER TABLE estimations RENAME TO estimations_old;
-```
+**Appliquer les migrations correctives (100% additives):**
 
-**SI `estimations_old` EXISTE DÉJÀ :**
-- La migration v2 créera la nouvelle table sans toucher à l'ancienne
-- Vérifier que les données importantes sont sauvegardées
+1. **Exécuter** : `supabase/migrations/0013_fix_estimation_schema.sql`
+   - Ajoute `user_id` si absent (SANS FK vers profiles)
+   - Ajoute toutes les colonnes manquantes (surface_habitable, etat_bien, etc.)
+   - Migre les données depuis anciennes colonnes si elles existent
+   - Crée les index manquants
+   - Applique valeurs par défaut safe
 
----
-
-### ÉTAPE 3 : APPLIQUER LA MIGRATION V2 (IDEMPOTENTE)
-
-1. **Exécuter** : `supabase/migrations/0011_estimation_complete_v2.sql`
-   - Cette migration est 100% idempotente
-   - Elle peut être relancée sans erreur
-   - Crée toutes les tables nécessaires avec IF NOT EXISTS
-
-2. **Vérifier le résultat :**
+2. **Vérifier :**
    ```sql
-   -- Vérifier que la nouvelle table estimations existe
-   SELECT column_name, data_type 
+   -- Vérifier que user_id existe
+   SELECT EXISTS(
+     SELECT 1 FROM information_schema.columns 
+     WHERE table_name='estimations' AND column_name='user_id'
+   );
+   -- Doit retourner true
+   
+   -- Vérifier colonnes critiques
+   SELECT column_name 
    FROM information_schema.columns 
    WHERE table_name='estimations' 
-   ORDER BY ordinal_position;
-   
-   -- Doit contenir : user_id, surface_habitable, code_postal, commune_id, etc.
+   AND column_name IN ('user_id', 'surface_habitable', 'etat_bien', 'code_postal')
+   ORDER BY column_name;
+   -- Doit retourner les 4 colonnes
+   ```
+
+3. **Exécuter** : `supabase/migrations/0014_fix_estimation_rls.sql`
+   - Recrée les policies RLS avec user_id
+   - S'assure que RLS est activé
+
+4. **Vérifier :**
+   ```sql
+   SELECT policyname, cmd 
+   FROM pg_policies 
+   WHERE tablename='estimations';
+   -- Doit afficher les policies users et admins
    ```
 
 ---
 
-### ÉTAPE 4 : ALIMENTER LES COMMUNES DU JURA
+### ÉTAPE 3 : ALIMENTER LES COMMUNES DU JURA
 
 1. **Exécuter** : `supabase/seed/communes_jura_39.sql`
    - Ajoute ~100 communes du Jura avec codes postaux
@@ -74,29 +84,7 @@ ALTER TABLE estimations RENAME TO estimations_old;
 
 ---
 
-### ÉTAPE 5 : APPLIQUER LES POLITIQUES RLS
-
-1. **Exécuter** : `supabase/migrations/0012_estimation_rls.sql`
-   - Active RLS sur toutes les tables estimation
-   - Crée les policies users/admins
-   - Configure les accès Storage
-
-2. **Tester les policies :**
-   ```sql
-   -- En tant qu'utilisateur non-admin
-   SELECT * FROM estimations LIMIT 1;
-   -- Doit retourner uniquement ses estimations
-   
-   -- Vérifier les policies créées
-   SELECT policyname, tablename 
-   FROM pg_policies 
-   WHERE schemaname='public' 
-   AND tablename LIKE 'estimation%';
-   ```
-
----
-
-### ÉTAPE 6 : VÉRIFIER STORAGE BUCKET
+### ÉTAPE 4 : VÉRIFIER STORAGE BUCKET
 
 ```sql
 -- Vérifier que le bucket 'estimations' existe
@@ -109,7 +97,7 @@ VALUES ('estimations', 'estimations', false);
 
 ---
 
-### ÉTAPE 7 : DÉPLOYER LE CODE (VERCEL)
+### ÉTAPE 5 : DÉPLOYER LE CODE (VERCEL)
 
 1. **Commit et push les modifications :**
    ```bash
@@ -132,7 +120,7 @@ VALUES ('estimations', 'estimations', false);
 
 ---
 
-### ÉTAPE 8 : TESTS EN PRODUCTION
+### ÉTAPE 6 : TESTS EN PRODUCTION
 
 #### Test 1 : API Communes
 ```bash
@@ -178,7 +166,7 @@ curl "https://votre-domaine.com/api/estimation/communes?code_postal=39100"
 
 ---
 
-### ÉTAPE 9 : MIGRATION DES ANCIENNES DONNÉES (SI NÉCESSAIRE)
+### ÉTAPE 7 : MIGRATION DES ANCIENNES DONNÉES (SI NÉCESSAIRE)
 
 **Si vous aviez des estimations dans l'ancienne table `estimations_old` :**
 
