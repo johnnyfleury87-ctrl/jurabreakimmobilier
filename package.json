@@ -11,6 +11,7 @@
     "security:audit": "bash scripts/security-audit.sh"
   },
   "dependencies": {
+    "@stripe/stripe-js": "^8.6.3",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.39.0",
     "iconv-lite": "^0.7.2",
