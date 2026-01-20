@@ -896,9 +896,9 @@ function EstimationsTab({ estimations, onReload, setMessage }) {
               <tr key={est.id}>
                 <td>#{est.id.slice(0, 8)}</td>
                 <td>
-                  {est.profiles?.nom} {est.profiles?.prenom}
+                  {est.nom} {est.prenom}
                   <br />
-                  <small>{est.profiles?.email}</small>
+                  <small>{est.email}</small>
                 </td>
                 <td>{getFormuleBadge(est.formule)}</td>
                 <td>

@@ -88,11 +88,11 @@ export async function POST(request, { params }) {
     }
     console.log(`${logPrefix} ✅ Mode test activé`)
 
-    // 3. RÉCUPÉRER L'ESTIMATION
+    // 3. RÉCUPÉRER L'ESTIMATION (SANS JOIN PROFILES)
     console.log(`${logPrefix} Étape 3: Chargement estimation...`)
     const { data: estimation, error: estError } = await supabase
       .from('estimations')
-      .select('*, profiles(email, nom, prenom)')
+      .select('*')
       .eq('id', id)
       .single()
 
@@ -119,6 +119,7 @@ export async function POST(request, { params }) {
     }
     
     console.log(`${logPrefix} ✅ Estimation chargée - Formule: ${estimation.formule}`)
+    console.log(`${logPrefix} Email client: ${estimation.email}`)
 
     // 4. GÉNÉRER LE PDF EN MODE TEST
     console.log(`${logPrefix} Étape 4: Génération PDF...`)
@@ -135,7 +136,7 @@ export async function POST(request, { params }) {
         estimation_id: id,
         test_mode: true,
         formule: estimation.formule,
-        user_email: estimation.profiles?.email || 'test@example.com',
+        user_email: estimation.email || 'test@jurabreakimmobilier.com',
         calcul_detail: estimation.calcul_detail
       })
     })
@@ -155,14 +156,15 @@ export async function POST(request, { params }) {
     }
 
     const pdfResult = await pdfResponse.json()
-    console.log(`${logPrefix} ✅ PDF généré: ${pdfResult.pdf_path}`)
+    const pdfPath = pdfResult.data?.pdf_path || pdfResult.pdf_path
+    console.log(`${logPrefix} ✅ PDF généré: ${pdfPath}`)
 
     // 5. METTRE À JOUR L'ESTIMATION
     console.log(`${logPrefix} Étape 5: MAJ base de données...`)
     const { error: updateError } = await supabase
       .from('estimations')
       .update({
-        pdf_path: pdfResult.pdf_path,
+        pdf_path: pdfPath,
         pdf_generated_at: new Date().toISOString(),
         pdf_mode: 'test'
       })
@@ -187,7 +189,7 @@ export async function POST(request, { params }) {
     return NextResponse.json({
       ok: true,
       data: {
-        pdf_path: pdfResult.pdf_path,
+        pdf_path: pdfPath,
         pdf_mode: 'test',
         formule: estimation.formule
       },
